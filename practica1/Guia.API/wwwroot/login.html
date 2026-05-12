@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Ingreso - Guía de Transformación</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #eceff1; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .login-card { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); width: 320px; text-align: center; }
+        h2 { color: #4a148c; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #cfd8dc; border-radius: 8px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #6a1b9a; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; }
+        .error { color: red; font-size: 14px; margin-top: 10px; display: none; }
+    </style>
+</head>
+<body>
+
+<div class="login-card">
+    <h2>Iniciar Sesión</h2>
+    <input type="text" id="user" placeholder="Nombre de usuario">
+    <input type="password" id="pass" placeholder="Contraseña">
+    <button onclick="realizarLogin()">Entrar</button>
+    <p style="text-align:center; margin-top:15px;">
+        ¿Eres nuevo? <a href="#" onclick="irAlRegistroNuevo()" style="color: #6a1b9a;">Regístrate aquí</a>
+    </p>
+    <div id="errorMsg" class="error">Credenciales inválidas</div>
+</div>
+
+<script>
+    function irAlRegistroNuevo() {
+        localStorage.removeItem('modoPantalla'); // Limpiamos cualquier rastro de edición
+        window.location.href = 'index.html'; // Tu página de registro se llama index.html según el enlace
+    }
+    async function realizarLogin() {
+        const user = document.getElementById('user').value;
+        const pass = document.getElementById('pass').value;
+        const errorDiv = document.getElementById('errorMsg');
+
+        // 1. Validación: Campos llenos
+            if (user === "" || pass === "") {
+                errorDiv.innerText = "Por favor, llena ambos campos.";
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+        // 2. Validación: Solo letras y números (RegEx)
+        // Esta expresión permite letras (a-z, A-Z) y números (0-9), sin espacios ni símbolos.
+            const regexAlfanumerico = /^[a-zA-Z0-9]+$/;
+
+            if (!regexAlfanumerico.test(user) || !regexAlfanumerico.test(pass)) {
+                errorDiv.innerText = "El usuario y contraseña solo deben contener letras y números.";
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            // Si pasa las validaciones, procedemos al envío
+            errorDiv.style.display = 'none';
+    try {
+        const response = await fetch('/api/personas/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: user, password: pass })
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            // Guardamos los datos en la sesión del navegador para usarlos en el Perfil
+            localStorage.setItem('usuarioInfo', JSON.stringify(data));
+            const idParaGuardar = data.id;// || data.personaId;
+            localStorage.setItem('personaId', idParaGuardar);
+            window.location.href = 'perfil.html'; // Nos redirige al perfil
+        } else {
+            document.getElementById('errorMsg').style.display = 'block';
+            errorDiv.innerText = "Credenciales inválidas";
+            errorDiv.style.display = 'block';
+        }
+    } catch (e) {
+        errorDiv.innerText = "Error de conexión con el servidor";
+        errorDiv.style.display = 'block';
+    }
+}
+</script>
+
+</body>
+</html>

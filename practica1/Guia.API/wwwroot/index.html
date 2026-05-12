@@ -1,0 +1,448 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mc-datepicker/dist/mc-calendar.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/mc-datepicker/dist/mc-calendar.min.js"></script> -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro - Guia de Transformacion</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .container { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+        h2 { color: #4a148c; text-align: center; margin-bottom: 1.5rem; }
+        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        button { width: 100%; padding: 12px; background-color: #6a1b9a; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; transition: background 0.3s; margin-top: 10px; }
+        button:hover { background-color: #4a148c; }
+        #resultado { margin-top: 20px; padding: 15px; border-radius: 8px; display: none; text-align: center; line-height: 1.6; }
+        .success { background-color: #e1f5fe; color: #01579b; border: 1px solid #b3e5fc; }
+
+        button#btnRegistro {
+            background: linear-gradient(135deg, #6a1b9a 0%, #4a148c 100%);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(106, 27, 154, 0.3);
+        }
+
+        button#btnRegistro:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(106, 27, 154, 0.5);
+            filter: brightness(1.1);
+        }
+
+        button#btnRegistro:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        button#btnCancelar {
+            background: transparent;
+            color: #7f8c8d;
+            border: 1px solid #bdc3c7;
+            padding: 10px;
+            border-radius: 25px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button#btnCancelar:hover {
+            background: #f8f9fa;
+            color: #2c3e50;
+            border-color: #95a5a6;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    
+    <h2 id="tituloPrincipal" style="margin-bottom: 25px;">Registro Espiritual</h2>
+    <input type="text" id="nombres" placeholder="Nombres">
+    <input type="text" id="apellidos" placeholder="Apellidos">
+    
+    <input type="text" id="fechaNacimiento" 
+           placeholder="Fecha de Nacimiento" 
+           onfocus="(this.type='date')" 
+           onblur="if(!this.value)this.type='text'">
+
+    <input type="email" id="email" placeholder="Correo electronico">
+    <input type="text" id="username" placeholder="Nombre de usuario">
+    <input type="password" id="password" placeholder="Contrasena">
+    
+    <button id="btnRegistro" onclick="enviarRegistro()">Descubrir mi Destino</button>
+    <!-- NUEVO: Botón de Cancelar (se mostrará solo en modo edición) -->
+    <button id="btnCancelar" onclick="cancelarEdicion()" style="display: none; background: none; color: #666; border: 1px solid #ccc; margin-top: 10px;">
+        Cancelar y Volver
+    </button>
+    <div id="resultado"></div>
+</div>
+<!-- <div class="container">
+    <h2>Registro Espiritual</h2>
+    <input type="text" id="nombres" placeholder="Nombres">
+    <input type="text" id="apellidos" placeholder="Apellidos">
+    <input type="date" id="fechaNacimiento" placeholder="mm/dd/aaaa">
+    <input type="email" id="email" placeholder="Correo electrÃ³nico">
+    <input type="text" id="username" placeholder="Nombre de usuario">
+    <input type="password" id="password" placeholder="ContraseÃ±a">
+    <button onclick="enviarRegistro()">Descubrir mi Destino</button>
+    <p style="text-align:center; margin-top:15px;">
+                Â¿Ya tienes cuenta? <a href="login.html" style="color: #6a1b9a;">Inicia sesiÃ³n aquÃ­</a>
+    </p>
+
+    <div id="resultado"></div>
+</div> -->
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const modo = localStorage.getItem('modoPantalla');
+
+        if (modo === 'edicion') {
+            
+            // 1. Cambiamos el título visual
+            document.getElementById('tituloPrincipal').innerText = "Actualizar Perfil";
+            
+            // 2. Cambiamos el texto del botón
+            const btn = document.getElementById('btnRegistro');
+            btn.textContent = "Guardar Cambios";
+
+            // 3. Ocultamos el campo de contraseña (opcional por seguridad)
+            document.getElementById('password').style.display = 'none';
+            document.getElementById('username').disabled = true; // El usuario no suele cambiarse
+            
+            // 4. Cambiamos la función que se ejecuta al hacer clic
+            btn.setAttribute('onclick', 'ejecutarActualizacion()');
+
+            // Mostramos el botón de cancelar
+            const btnCan = document.getElementById('btnCancelar');
+            if (btnCan) btnCan.style.display = 'block';
+
+            // 5. Cargar los datos actuales para que el usuario los vea
+            cargarDatosActuales();
+        }
+    });
+    function cancelarEdicion() {
+        // 1. Limpiamos el modo para que no interfiera en futuros registros
+        localStorage.removeItem('modoPantalla');
+        
+        // 2. Regresamos al perfil
+        window.location.href = 'perfil.html';
+    }
+    async function ejecutarActualizacion() {
+        const btn = document.getElementById('btnRegistro');
+        const personaId = localStorage.getItem('personaId');
+
+        const datos = {
+            nombres: document.getElementById('nombres').value.trim(),
+            apellidos: document.getElementById('apellidos').value.trim(),
+            fechaNacimiento: document.getElementById('fechaNacimiento').value,
+            email: document.getElementById('email').value.trim(),
+            // Enviamos estos vacíos o fijos ya que el controlador no los editará
+            username: "N/A", 
+            password: "N/A"
+        };
+
+        try {
+            btn.disabled = true;
+            btn.textContent = 'Recalculando tu destino...';
+
+            const response = await fetch(`/api/personas/actualizar/${personaId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(datos)
+            });
+
+            if (!response.ok) throw new Error("Error en la actualización");
+
+            alert("¡Tu información ha sido actualizada y tu Árbol recalculado! ✨");
+            
+            // Limpiamos el modo y volvemos
+            localStorage.removeItem('modoPantalla');
+            window.location.href = 'perfil.html';
+
+        } catch (error) {
+            alert("Aviso: " + error.message);
+            btn.disabled = false;
+            btn.textContent = "Guardar Cambios";
+        }
+    }
+    async function ejecutarActualizacionTest() {
+        const btn = document.getElementById('btnRegistro');
+        const personaId = localStorage.getItem('personaId');
+        
+        const datos = {
+            id: parseInt(personaId),
+            nombres: document.getElementById('nombres').value.trim(),
+            apellidos: document.getElementById('apellidos').value.trim(),
+            fechaNacimiento: document.getElementById('fechaNacimiento').value,
+            email: document.getElementById('email').value.trim()
+        };
+
+        // Validaciones básicas (puedes reutilizar las que ya tienes)
+        if (!datos.nombres || !datos.apellidos || !datos.fechaNacimiento) {
+            alert("Por favor, completa los campos obligatorios. Recuerda ingresar tus nombres y apellidos completos");
+            return;
+        }
+
+        try {
+            btn.disabled = true;
+            btn.textContent = "Actualizando...";
+
+            // 1. Enviamos la actualización de los datos personales
+            const response = await fetch(`/api/personas/actualizar/${personaId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(datos)
+            });
+
+            if (response.ok) {
+                // 2. IMPORTANTE: Recalcular el Árbol de la Vida
+                // Aquí llamamos a la misma función de cálculo que usas en el registro
+                // pero pasándole los datos actualizados
+                await recalcularArbol(datos);
+
+                alert("¡Perfil y Árbol de la Vida actualizados correctamente!");
+                
+                // Limpiamos el modo y regresamos al perfil
+                localStorage.removeItem('modoPantalla');
+                window.location.href = 'perfil.html';
+            } else {
+                throw new Error("No se pudo actualizar el perfil.");
+            }
+        } catch (error) {
+            alert(error.message);
+            btn.disabled = false;
+            btn.textContent = "Guardar Cambios";
+        }
+    }
+    async function recalcularArbol(personaData) {
+        // Aquí invocamos la lógica de numerología que ya tienes en el cliente
+        // para obtener los valores de Mision de Vida, Alma, etc. con los NUEVOS nombres
+        const nuevosCalculosNumerologicos = calcularNumerologiaOmétrica(personaData); 
+
+        const request = {
+            persona: { id: personaData.id, fechaNacimiento: personaData.fechaNacimiento },
+            datos: nuevosCalculosNumerologicos
+        };
+
+        await fetch('/api/ArbolVida/CalcularArbolDeLaVida', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(request)
+        });
+    }
+    async function enviarRegistV1() {
+        const btn = document.getElementById('btnRegistro');
+        const divResultado = document.getElementById('resultado');
+        const textoOriginal = btn.textContent;
+
+        const datos = {
+            nombres: document.getElementById('nombres').value.trim(),
+            apellidos: document.getElementById('apellidos').value.trim(),
+            fechaNacimiento: document.getElementById('fechaNacimiento').value.trim(),
+            email: document.getElementById('email').value.trim(),
+            username: document.getElementById('username').value.trim(),
+            password: document.getElementById('password').value.trim()
+        };
+
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailPattern.test(datos.email)) {
+            alert('Por favor ingresa un correo electronico valido.');
+            return;
+        }
+
+        if (!datos.nombres || !datos.apellidos || !datos.fechaNacimiento || !datos.email || !datos.username || !datos.password) {
+            alert('Por favor completa todos los campos.');
+            return;
+        }
+
+        try {
+            btn.disabled = true;
+            btn.textContent = 'Calculando tu destino...';
+            btn.style.opacity = '0.7';
+
+            const response = await fetch('/api/personas/registrar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(datos)
+            });
+
+            if (!response.ok) {
+                let errorMsg = 'No se pudo completar el registro.';
+                const contentType = response.headers.get('content-type') || '';
+                if (contentType.includes('application/json')) {
+                    const errJson = await response.json();
+                    errorMsg = errJson.mensaje || errJson.title || JSON.stringify(errJson);
+                } else {
+                    const errorTxt = await response.text();
+                    if (errorTxt) errorMsg = errorTxt;
+                }
+                throw new Error(errorMsg);
+            }
+
+            const res = await response.json();
+            const usuario = res.usuario ?? res.Usuario ?? datos.username;
+            divResultado.style.display = 'block';
+            divResultado.className = 'success';
+            divResultado.innerHTML = `<p><strong>Bienvenido/a ${usuario}</strong><br>Redirigiendo al login...</p>`;
+
+            setTimeout(() => {
+                window.location.href = 'login.html';
+            }, 2500);
+        } catch (error) {
+            console.error(error);
+            alert('Aviso: ' + (error?.message || 'Error de conexion.'));
+            btn.disabled = false;
+            btn.textContent = textoOriginal;
+            btn.style.opacity = '1';
+        }
+    }
+
+    async function enviarRegistro() {
+        const btn = document.getElementById('btnRegistro');
+        const divResultado = document.getElementById('resultado');
+        const textoOriginal = btn.textContent;
+
+        // Obtenemos y limpiamos los valores
+        const datos = {
+            nombres: document.getElementById('nombres').value.trim(),
+            apellidos: document.getElementById('apellidos').value.trim(),
+            fechaNacimiento: document.getElementById('fechaNacimiento').value.trim(),
+            email: document.getElementById('email').value.trim(),
+            username: document.getElementById('username').value.trim(),
+            password: document.getElementById('password').value.trim()
+        };
+
+        // 1. Validación: Que ningún campo esté vacío
+        if (!datos.nombres || !datos.apellidos || !datos.fechaNacimiento || !datos.email || !datos.username || !datos.password) {
+            alert('Por favor completa todos los campos.');
+            return;
+        }
+
+        // 2. Validación: Solo letras y números para Usuario y Contraseña
+        // La regex /^[a-zA-Z0-9]+$/ no permite espacios, puntos ni caracteres especiales
+        const regexAlfanumerico = /^[a-zA-Z0-9]+$/;
+        
+        if (!regexAlfanumerico.test(datos.username)) {
+            alert('El nombre de usuario solo puede contener letras y números (sin espacios).');
+            return;
+        }
+
+        if (!regexAlfanumerico.test(datos.password)) {
+            alert('La contraseña solo puede contener letras y números (sin espacios).');
+            return;
+        }
+
+        // 3. Validación de Email (la que ya tenías)
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailPattern.test(datos.email)) {
+            alert('Por favor ingresa un correo electrónico válido.');
+            return;
+        }
+
+        try {
+            btn.disabled = true;
+            btn.textContent = 'Calculando tu destino...';
+            btn.style.opacity = '0.7';
+
+            const response = await fetch('/api/personas/registrar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(datos)
+            });
+
+            if (!response.ok) {
+                let errorMsg = 'No se pudo completar el registro.';
+                const contentType = response.headers.get('content-type') || '';
+                if (contentType.includes('application/json')) {
+                    const errJson = await response.json();
+                    errorMsg = errJson.mensaje || errJson.title || JSON.stringify(errJson);
+                } else {
+                    const errorTxt = await response.text();
+                    if (errorTxt) errorMsg = errorTxt;
+                }
+                throw new Error(errorMsg);
+            }
+
+            const res = await response.json();
+            const usuario = res.usuario ?? res.Usuario ?? datos.username;
+            divResultado.style.display = 'block';
+            divResultado.className = 'success';
+            divResultado.innerHTML = `<p><strong>Bienvenido/a ${usuario}</strong><br>Redirigiendo al login...</p>`;
+
+            setTimeout(() => {
+                window.location.href = 'login.html';
+            }, 2500);
+
+        } catch (error) {
+            console.error(error);
+            alert('Aviso: ' + (error?.message || 'Error de conexión.'));
+            btn.disabled = false;
+            btn.textContent = textoOriginal;
+            btn.style.opacity = '1';
+        }
+    }
+    if (window.MCDatepicker) {
+        MCDatepicker.create({
+            el: '#fechaNacimiento',
+            bodyType: 'modal',
+            dateFormat: 'dd/mm/yyyy',
+            customOkBTN: 'Confirmar',
+            customClearBTN: 'Limpiar',
+            customCancelBTN: 'Cancelar',
+            selectedDate: new Date(1990, 0, 1),
+            theme: {
+                main: '#4a148c',
+                active: '#d4af37'
+            }
+        });
+    }
+
+    async function cargarDatosActuales() {
+        // Obtenemos el ID de la persona que guardamos al hacer login
+        const personaId = localStorage.getItem('personaId'); 
+
+        if (!personaId) {
+            alert("No se encontró sesión activa.");
+            window.location.href = 'login.html';
+            return;
+        }
+
+        try {
+            // Llamamos a tu API para obtener los datos de la persona
+            const response = await fetch(`/api/personas/${personaId}`);
+            
+            if (response.ok) {
+                const persona = await response.json();
+
+                // Llenamos los inputs con la información actual
+                document.getElementById('nombres').value = persona.nombres || '';
+                document.getElementById('apellidos').value = persona.apellidos || '';
+                document.getElementById('email').value = persona.email || '';
+                document.getElementById('username').value = persona.username || '';
+                //document.getElementById('password').value = persona.password || '';
+                
+                // Tratamiento especial para la fecha (formato YYYY-MM-DD para el input)
+                if (persona.fechaNacimiento) {
+                    const fecha = persona.fechaNacimiento.split('T')[0];
+                    document.getElementById('fechaNacimiento').value = fecha;
+                }
+            } else {
+                console.error("Error al recuperar datos del perfil");
+            }
+        } catch (error) {
+            console.error("Error de conexión:", error);
+        }
+    }
+
+</script>
+
+</body>
+</html>
+

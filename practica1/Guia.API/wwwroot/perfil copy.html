@@ -1,0 +1,2341 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Mi Perfil Espiritual</title>
+    <style>
+        :root { --primary: #4a148c; --accent: #ffd700; --bg: #f8f9fa; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #333; }
+        .header { text-align: center; padding: 20px 0; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; max-width: 800px; margin: 0 auto; }
+
+        /* Tarjeta Principal: Vibración del Día */
+        .vibe-card {
+            background: linear-gradient(135deg, #6a1b9a, #4a148c);
+            color: white; padding: 30px; border-radius: 20px;
+            text-align: center; margin-bottom: 25px; box-shadow: 0 10px 20px rgba(74, 20, 140, 0.2);
+            max-width: 800px; margin-left: auto; margin-right: auto;
+        }
+        .vibe-number { font-size: 72px; font-weight: bold; color: var(--accent); margin: 10px 0; }
+
+        /* Tarjetas de Números */
+        .stat-card {
+            background: white; padding: 20px; border-radius: 15px;
+            text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            cursor: pointer; transition: transform 0.2s; border-bottom: 4px solid var(--primary);
+        }
+        .stat-card:hover { transform: translateY(-5px); background: #f3e5f5; }
+        .stat-card h3 { font-size: 14px; color: #777; margin: 0; text-transform: uppercase; }
+        .stat-card p { font-size: 28px; font-weight: bold; margin: 10px 0; color: var(--primary); }
+
+        .gratitude-box {
+            max-width: 800px; margin: 25px auto; background: #fffde7;
+            padding: 20px; border-radius: 15px; border-left: 5px solid var(--accent);
+            font-style: italic; text-align: center;
+        }
+
+        /* Estilos del Modal */
+        /* El contenedor oscuro de fondo */
+        .modal {
+            display: none;
+            position: fixed; z-index: 1000;
+            left: 0; top: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.8);
+            backdrop-filter: blur(5px);
+            overflow-y: auto;
+            overscroll-behavior: contain; /* Bloquea el rebote del fondo */
+        }
+
+        /* La tarjeta blanca con la información */
+        .modal-content {
+            background: white; margin: 30px auto; padding: 25px;
+            border-radius: 20px; width: 90%; max-width: 550px;
+            /* border-top: 8px solid var(--primary); */
+            position: relative;
+
+            /* ESTO ES CLAVE: Si el contenido es más alto que la pantalla, se activa el scroll interno */
+            max-height: calc(100vh - 60px);
+            overflow-y: auto;
+            border-top: 8px solid #4a148c;
+            animation: slideUp 0.3s ease-out;
+            /* animation: slideDown 0.4s; */
+            -webkit-overflow-scrolling: touch; /* Hace el scroll suave en iOS */
+            overscroll-behavior: contain; /* Bloquea el rebote interno */
+        }
+        /* Una animación más suave para que suba */
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+
+        @keyframes slideDown {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .close-btn {
+            position: absolute; right: 20px; top: 15px;
+            font-size: 24px; cursor: pointer; color: #999;
+        }
+        #modalTitulo { color: var(--primary); margin-top: 0; }
+        #modalTexto { line-height: 1.6; color: #555; font-size: 18px; }
+
+        /* Estilos para las secciones del Modal */
+        .modal-section {
+            margin-bottom: 15px;
+            padding: 15px;
+            border-radius: 12px;
+            border-left: 5px solid #4a148c;
+            background: #f9f6ff;
+        }
+
+        .section-title {
+            display: block;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            color: #6a1b9a;
+            margin-bottom: 5px;
+        }
+
+        /* Estilo especial para el Mantra */
+        .mantra-box {
+            background: #fff3e0;
+            border-left: 5px solid #ff9800;
+            padding: 20px;
+            text-align: center;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+
+        #modalMantra {
+            font-family: 'Georgia', serif;
+            font-style: italic;
+            font-size: 1.2rem;
+            color: #e65100;
+        }
+
+        /* Estilo para el Amuleto */
+        .amuleto-tag {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 5px 15px;
+            border-radius: 20px;
+            display: inline-block;
+            font-weight: bold;
+            border: 1px solid #c8e6c9;
+        }
+
+        body {
+            background-color: #f4f7f6; /* O el color claro que estés usando */
+            margin: 0;
+            height: 100%;
+        }
+
+
+        .btn-flotante {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        width: 60px;
+        height: 60px;
+        background-color: #d4af37; /* Dorado */
+        color: white;
+        border-radius: 50%;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        z-index: 999;
+        transition: transform 0.3s;
+    }
+
+    .btn-flotante:hover { transform: scale(1.1); }
+
+    /* Ajuste para que el texto no se salga del cuadro */
+    .contenido-timeline p, .item-bitacora p {
+        word-break: break-word; /* Rompe palabras largas */
+        overflow-wrap: break-word;
+        white-space: normal;
+        line-height: 1.4;
+        margin: 5px 0 0 0;
+    }
+    .item-bitacora {
+        background: white;
+        border-radius: 15px;
+        padding: 12px !important;
+        margin-bottom: 10px !important;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        border-left: 5px solid #ddd;
+        animation: fadeIn 0.5s ease;
+    }
+
+    /* Evitar que el fondo negro "baile" */
+    #modalHistorial {
+        overscroll-behavior: contain;
+    }
+    /* Scroll interno suave para el historial */
+    #listaBitacora {
+        max-height: 60vh; /* Altura fija para que no crezca infinito */
+        overflow-y: auto;
+        padding: 10px;
+        border-radius: 10px;
+        background: #f8f9fa; /* Un gris muy tenue para diferenciar del blanco */
+    }
+    /* Colores por tipo para diferenciar visualmente */
+    .tipo-Sincronicidad { border-left-color: #ff9800; } /* Naranja */
+    .tipo-Reto { border-left-color: #4caf50; }         /* Verde */
+    .tipo-Sentimiento { border-left-color: #2196f3; }    /* Azul */
+
+    .fecha-bitacora {
+        font-size: 0.75rem;
+        color: #aaa;
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    .badge-tipo {
+        font-size: 0.7rem;
+        padding: 2px 8px;
+        border-radius: 10px;
+        text-transform: uppercase;
+        font-weight: bold;
+        margin-left: 10px;
+    }
+
+    #avanceReto {
+        max-height: 100px;
+        overflow-y: auto;
+        resize: none; /* Evita que el usuario deforme el cuadro manualmente */
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(74, 20, 140, 0.2);
+    }
+
+    /* El contenedor del reto con scroll suave si el texto de la descripción es largo */
+    #cardReto {
+        max-height: 85vh; /* No permite que sea más alto que el 85% de la pantalla */
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    @media (max-width: 600px) {
+        #contenedorReto {
+            margin: 10px; /* Menos margen en móvil */
+            width: calc(100% - 20px);
+        }
+
+        #cardReto {
+            padding: 15px; /* Padding más ajustado */
+        }
+
+        #retoTitulo {
+            font-size: 1.1rem; /* Letra un poco más pequeña para que no rompa líneas */
+        }
+
+        .btn-flotante {
+            width: 50px;
+            height: 50px;
+            bottom: 20px;
+            right: 20px;
+        }
+        .modal-content {
+            width: 95% !important;
+            padding: 15px !important;
+            margin: 10px auto !important;
+        }
+
+        .item-bitacora {
+            padding: 10px !important;
+        }
+
+        .item-bitacora span[style*="font-size: 1.5rem"] {
+            font-size: 1.2rem !important; /* Iconos más pequeños */
+        }
+
+        .fecha-bitacora {
+            font-size: 0.65rem !important;
+        }
+    }
+
+    /* Contenedor principal del reto en el historial */
+    .card-historial-reto {
+        background: white;
+        border-left: 5px solid #4a148c;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        padding: 15px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    .reto-finalizado {
+        border-left-color: #2e7d32; /* Verde si terminó */
+    }
+
+    .reto-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 10px;
+        margin-bottom: 10px;
+    }
+
+    .reto-detalles {
+        padding-left: 10px;
+        border-left: 2px dashed #ddd;
+        margin-left: 10px;
+    }
+
+    .paso-bitacora {
+        font-size: 0.9rem;
+        margin: 8px 0;
+        display: flex;
+        gap: 10px;
+    }
+
+    .paso-bitacora .hora {
+        color: #888;
+        min-width: 50px;
+        font-size: 0.75rem;
+    }
+
+
+    .btn-exportar {
+        background: linear-gradient(135deg, #6a1b9a, #4a148c);
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: bold;
+        cursor: pointer;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        transition: transform 0.2s;
+        margin-top: 10px;
+    }
+
+    .btn-exportar:active {
+        transform: scale(0.95);
+    }
+
+    /* Ajuste para que el nombre quepa y se vea bien */
+    #txtSaludo {
+        font-size: calc(1.4rem + 1vw); /* Tamaño fluido */
+        word-wrap: break-word;
+        margin-bottom: 5px;
+        color: #4a148c;
+        text-overflow: ellipsis;/* Pone "..." si el nombre es gigantesco */
+        white-space: nowrap; /* Evita que el texto baje a otra línea */
+        display: block;
+    }
+
+    /* Evita que las coordenadas se amontonen en móviles pequeños */
+    .coordenadas-grid {
+        /* display: grid !important;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 10px !important;
+        width: 100%;
+        max-width: 500px;
+        margin: 0 auto !important; */
+
+        display: flex;
+        flex-wrap: wrap; /* Esto permite que bajen si no caben */
+        justify-content: center;
+        gap: 10px;
+        padding: 10px;
+    }
+
+    /* Estilo para que se sienta que son botones al tocar */
+    .coordinate-item:active {
+        transform: scale(0.95);
+        background: rgba(106, 27, 154, 0.15) !important;
+    }
+
+    .coordinate-item {
+        flex: 1 1 140px; /* Tamaño mínimo de 140px por círculo */
+        max-width: 160px;
+        min-height: 70px;
+    }
+
+    /* Contenedor para quitar espacios entre tarjetas */
+    .vibracion-card {
+        /*margin-bottom: 8px !important; Espacio mínimo con la de abajo */
+        background: linear-gradient(135deg, #4a148c 0%, #311b92 100%) !important;
+        border: 2px solid #9575cd; /* Marco lila metálico */
+        box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        transition: transform 0.3s ease;
+    }
+
+    .card-superpoder {
+        /* margin-top: 0 !important;
+        margin-bottom: 20px !important; Espacio con el grid de abajo */
+        background: linear-gradient(135deg, #b8860b 0%, #d4af37 100%) !important;
+        border: 2px solid #fff2af; /* Marco dorado brillante */
+        box-shadow: 0 10px 25px rgba(184, 134, 11, 0.4);
+        transition: transform 0.3s ease;    
+    }
+
+    /* Efecto al tocar (Para el celular) */
+    .vibracion-card:active, .superpoder-card:active {
+        transform: scale(0.97);
+    }
+
+    /* Ajuste de los títulos dentro de las tarjetas */
+    .card-label {
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        font-size: 0.7rem;
+        opacity: 0.8;
+        font-weight: bold;
+    }
+    </style>
+</head>
+<body>
+    <!-- Antes -->
+    <!-- <div class="header">
+        <h1 id="txtSaludo">¡Hola!</h1>
+        <p id="txtAstro">Cargando tu energía...</p>
+    </div>
+
+    <div class="vibe-card">
+        <h3>Tu Vibración de Hoy</h3>
+        <div class="vibe-number" id="numVibracion">?</div>
+        <p id="txtVibeMensaje">-</p>
+    </div> -->
+
+    <div class="header-container" style="text-align: center; padding: 25px 20px; color: #4a148c;">
+
+        <h2 id="txtSaludo" style="margin: 0; font-weight: bold; font-size: 1.8rem;">¡Cargando...!</h2>
+
+        <div class="coordenadas-grid" style="display: flex; justify-content: center; gap: 15px; margin: 15px 0 25px 0; font-size: 0.9rem; flex-wrap: wrap;">
+
+            <div class="coordinate-item" onclick="abrirModalAstro('signo')" style="cursor: pointer; display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: rgba(106, 27, 154, 0.05); border-radius: 20px;">
+                <span style="font-size: 1.1rem;">♈</span> <div>
+                    <span id="labelSigno" style="font-weight: bold; color: #6a1b9a; font-size: 0.8rem; display: block; text-transform: uppercase; letter-spacing: 1px;">Tu Signo</span>
+                    <span id="txtSigno" style="color: #555;">Capricornio</span>
+                </div>
+            </div>
+
+            <div class="coordinate-item" onclick="abrirModalAstro('luna')" style="cursor: pointer; display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: rgba(106, 27, 154, 0.05); border-radius: 20px;">
+                <span style="font-size: 1.1rem;">🌗</span>
+                <div>
+                    <span id="labelLuna" style="font-weight: bold; color: #6a1b9a; font-size: 0.8rem; display: block; text-transform: uppercase; letter-spacing: 1px;">Tu Luna</span>
+                    <span id="txtLuna" style="color: #555;">Cuarto Menguante</span>
+                </div>
+            </div>
+
+            <div class="coordinate-item" onclick="abrirModalAstro('lunaActual')" style="cursor: pointer; display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: rgba(74, 20, 140, 0.1); border-radius: 20px; border: 1px solid #d4af37;">
+                <span id="iconoLunaActual" style="font-size: 1.1rem;">⏳</span>
+                <div>
+                    <span style="font-weight: bold; color: #d4af37; font-size: 0.7rem; display: block; text-transform: uppercase; letter-spacing: 1px;">Cielo Hoy</span>
+                    <span id="txtLunaActual" style="color: #555; font-size: 0.85rem;">Calculando...</span>
+                </div>
+            </div>
+
+            <div class="coordinate-item" onclick="abrirModalAstro('elemento')" style="cursor: pointer; display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: rgba(106, 27, 154, 0.05); border-radius: 20px;">
+                <span style="font-size: 1.1rem;">🌍</span>
+                <div>
+                    <span id="labelElemento" style="font-weight: bold; color: #6a1b9a; font-size: 0.8rem; display: block; text-transform: uppercase; letter-spacing: 1px;">Tu Elemento</span>
+                    <span id="txtElemento" style="color: #555;">Tierra</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="vibracion-card" style="padding: 20px; border-radius: 25px; max-width: 450px; margin: 0 auto 10px auto; text-align: center; color: white; cursor: pointer;">
+            <span class="card-label">Tu Vibración de Hoy</span>
+            <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-top: 5px;">
+                <h2 id="numVibracion" style="margin: 0; font-size: 2.5rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">--</h2>
+                <div style="text-align: left; line-height: 1.2;">
+                    <p id="txtVibeMensaje" style="margin: 0; font-size: 0.95rem; font-style: italic;">Cargando mensaje...</p>
+                </div>
+            </div>
+        </div>
+
+
+        <div id="card-superpoder" class="superpoder-card" onclick="abrirModalSuperpoder()" 
+            style="background: linear-gradient(135deg, #b8860b 0%, #d4af37 100%); 
+                    color: white; 
+                    padding: 20px; 
+                    border-radius: 25px; 
+                    box-shadow: 0 10px 25px rgba(184, 134, 11, 0.4); 
+                    max-width: 450px; 
+                    cursor: pointer; 
+                    margin: -10px auto 25px auto; 
+                    border: 2px solid #fff2af; 
+                    position: relative; 
+                    z-index: 10;">
+            
+            <div style="display: flex; align-items: center; justify-content: center; gap: 15px;">
+                <div style="background: rgba(255,255,255,0.2); width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; border: 1px solid white;">
+                    ⚡
+                </div>
+                
+                <div style="text-align: left;">
+                    <h4 id="numSuperpoder" style="margin: 0; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; opacity: 0.9; font-weight: bold;">Tu Regalo Divino</h4>
+                    
+                    <h2 id="txtSuperpoder" style="margin: 0; font-size: 1.3rem; font-weight: 800; text-shadow: 1px 1px 3px rgba(0,0,0,0.3);">Cargando...</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="contenedorReto" style="display: none; margin: 20px auto; max-width: 600px;">
+        <div id="cardReto" style="background: linear-gradient(135.2deg, #4a148c 0%, #7b1fa2 100%); color: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 20px rgba(74, 20, 140, 0.3);">
+
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span id="tagEstado" style="font-size: 0.7rem; background: rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 10px; text-transform: uppercase;">🌟 Reto Sugerido</span>
+                <span id="fechaReto" style="font-size: 0.7rem; opacity: 0.8;"></span>
+            </div>
+
+            <h3 id="retoTitulo" style="margin: 15px 0; color: white; font-size: 1.4rem;"></h3>
+            <p id="retoDesc" style="font-size: 1rem; line-height: 1.5; opacity: 0.9; margin-bottom: 20px;"></p>
+
+            <div id="seccionAceptar">
+                <button onclick="aceptarReto()" style="background: #d4af37; color: white; border: none; padding: 12px; border-radius: 25px; font-weight: bold; cursor: pointer; width: 100%; font-size: 1rem;">
+                    ✨ Aceptar este Reto
+                </button>
+            </div>
+
+            <div id="seccionSeguimiento" style="display: none;">
+                <label style="font-size: 0.8rem; display: block; margin-bottom: 10px;">¿Cómo vas con este reto? Escribe tus avances:</label>
+                <textarea id="avanceReto" placeholder="Escribe lo que vas sintiendo..." style="width: 100%; border-radius: 10px; padding: 10px; border: none; margin-bottom: 15px; color: #333;"></textarea>
+
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="guardarAvance()" style="flex: 2; background: rgba(255,255,255,0.2); color: white; border: 1px solid white; padding: 10px; border-radius: 20px; cursor: pointer; font-weight: bold;">
+                        📝 Guardar Avance
+                    </button>
+                    <button onclick="finalizarReto()" style="flex: 1; background: #4caf50; color: white; border: none; padding: 10px; border-radius: 20px; cursor: pointer; font-weight: bold;">
+                        ✅ Finalizar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="contenedorReto_ant" style="display: none; margin: 20px auto; max-width: 600px;">
+        <div style="background: linear-gradient(135.2deg, #4a148c 0%, #7b1fa2 100%); color: white; padding: 20px; border-radius: 20px; box-shadow: 0 10px 20px rgba(74, 20, 140, 0.3);">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">🌟 Reto de Transformación</span>
+                <span id="fechaReto" style="font-size: 0.7rem; opacity: 0.8;"></span>
+            </div>
+            <h3 id="retoTitulo" style="margin: 10px 0; color: white;"></h3>
+            <p id="retoDesc" style="font-size: 0.9rem; line-height: 1.4; opacity: 0.9;"></p>
+            <button onclick="marcarRetoCumplido()" style="background: #d4af37; color: white; border: none; padding: 10px 20px; border-radius: 25px; font-weight: bold; margin-top: 15px; cursor: pointer; width: 100%;">
+                ¡Acepto el Reto!
+            </button>
+        </div>
+    </div>
+    <div class="grid">
+        <div class="stat-card" onclick="verDetalle('mision')">
+            <h3>Misión de Vida</h3>
+            <p id="descMision" style="font-size: 0.75rem; color: #777; font-style: italic; line-height: 1.1; margin-bottom: 5px;">Cargando definición...</p>
+            <p id="numMision" style="font-weight: bold; font-size: 1.5rem; margin: 0;">-</p>
+
+        </div>
+        <div class="stat-card" onclick="verDetalle('alma')">
+            <h3>Numero del Alma</h3>
+            <p id="numAlma">-</p>
+        </div>
+        <div class="stat-card" onclick="verDetalle('destino')">
+            <h3>Destino</h3>
+            <p id="numDestino">-</p>
+        </div>
+        <div class="stat-card" onclick="verDetalle('personalidad')">
+            <h3>Personalidad</h3>
+            <p id="numPers">-</p>
+        </div>
+        <div class="stat-card" style="border-bottom: 4px solid #d4af37;" onclick="verDetalle('año-personal')">
+            <h3>Mi Año Personal</h3>
+            <p id="numAñoPers">-</p>
+        </div>
+        <div class="stat-card" style="border-bottom: 4px solid #9e9e9e;" onclick="verDetalle('año-universal')">
+            <h3>Año Universal</h3>
+            <p id="numAñoUniv">-</p>
+        </div>
+        <div style="text-align: center; margin: 30px 0;">
+            <button onclick="abrirHistorial()" style="background: none; border: 2px solid #4a148c; color: #4a148c; padding: 10px 25px; border-radius: 25px; font-weight: bold; cursor: pointer;">
+                📜 Ver mi Historial de Transformación
+            </button>
+        </div>
+        <!-- <div class="contenedor-bitacora" style="margin-top: 40px; padding: 20px;">
+            <h3 style="color: #4a148c; border-bottom: 2px solid #d4af37; padding-bottom: 10px;">
+                Mi Camino de Transformación
+            </h3>
+            <div id="listaBitacora" style="margin-top: 20px;">
+                <p style="color: #999; text-align: center;">Cargando tu historia...</p>
+            </div>
+        </div> -->
+    </div>
+
+    <div class="gratitude-box">
+        <small id="txtGratitudCat" style="color: #6a1b9a; font-weight: bold; text-transform: uppercase; font-size: 10px;"></small>
+        <p style="margin-top: 5px;"><strong>Hoy agradezco por:</strong> <span id="txtGratitud">...</span></p>
+        <!-- <p><strong>Hoy agradezco por:</strong> <span id="txtGratitud">...</span></p> -->
+    </div>
+
+    <script>
+            // async function cargarDefinicionesTemas() {
+            //     const user = JSON.parse(localStorage.getItem('usuarioInfo'));
+            //     if (!user) return;
+
+            //     try {
+            //         // Consultamos el detalle del número actual del usuario para el Tema 1 (Misión)
+            //         // Esto nos traerá: el Apodo, el Número y la DescripcionGeneral del Tema.
+            //         const response = await fetch(`/api/significados/detalle/1/${user.misionVida}`);
+
+            //         if (response.ok) {
+            //             const data = await response.json();
+
+            //             // 1. Ponemos el número del usuario
+            //             document.getElementById('numMision').innerText = user.misionVida;
+
+            //             // 2. Inyectamos la "Descripción General" que querías (la del DbInitializer)
+            //             document.getElementById('descMision').innerText = data.descripcionTema;
+
+            //             // 3. Opcional: Podríamos poner el Apodo al lado del número
+            //             document.getElementById('numMision').innerHTML += ` <span style="font-size:0.9rem; font-weight:normal; color:#2e7d32;">- ${data.apodo}</span>`;
+            //         }
+            //     } catch (error) {
+            //         console.error("Error al cargar definiciones:", error);
+            //     }
+            // }
+
+            // // Llamar al cargar la página
+            // document.addEventListener('DOMContentLoaded', cargarDefinicionesTemas);
+
+
+        async function cargarDatos_anteSinNombreCOmpleto() {
+                const data = JSON.parse(localStorage.getItem('usuarioInfo'));
+                if(!data) { window.location.href = 'login.html'; return; }
+
+                // Llenar Header
+                document.getElementById('txtSaludo').innerText = `¡Hola, ${data.nombre.split(' ')[0]}!`;
+                document.getElementById('txtAstro').innerText = `${data.datosAstro.signo} • ${data.datosAstro.luna} • Elemento ${data.datosAstro.elemento || 'Agua'}`;
+
+                // Llenar Números
+                document.getElementById('numMision').innerText = data.datosNumerologia.mision;
+                document.getElementById('numAlma').innerText = data.datosNumerologia.alma;
+                document.getElementById('numDestino').innerText = data.datosNumerologia.destino;
+                document.getElementById('numPers').innerText = data.datosNumerologia.personalidad;
+                document.getElementById('numAñoPers').innerText = data.datosNumerologia.añoPersonal;
+                document.getElementById('numAñoUniv').innerText = data.datosNumerologia.añoUniversal;
+                //document.getElementById('numVibracion').innerText = num.vibracionHoy;
+                document.getElementById('txtGratitud').innerText = data.datosAstro.gratitud;
+                document.getElementById('txtGratitudCat').innerText = data.datosAstro.gratitudCategoria;
+
+                // Dentro de cargarDatos() en perfil.html
+                document.getElementById('numVibracion').innerText = data.datosNumerologia.vibracionHoy;
+                document.getElementById('txtVibeMensaje').innerText = data.datosNumerologia.mensajeVibracion; // <-- DINÁMICO
+                //document.getElementById('descMision').innerText = data.descripcionTema; // <-- DINÁMICO
+                // --- 2. AQUÍ HACEMOS LA CONSULTA A LA BASE DE DATOS ---
+            try {
+                // Consultamos al API el detalle del número de misión para el Tema 1 (Lección de Vida)
+                const response = await fetch(`/api/significados/detalle/1/${data.datosNumerologia.mision}`);
+
+                if (response.ok) {
+                    const infoBD = await response.json();
+
+                    // Ahora sí, llenamos la descripción con lo que vino de la base de datos
+                    // "Representa el camino que has venido a recorrer..."
+                    document.getElementById('descMision').innerText = infoBD.descripcionTema;
+
+                    // Opcional: Podemos añadir el Apodo al número para que se vea más completo
+                    document.getElementById('numMision').innerText = `${data.datosNumerologia.mision} - ${infoBD.apodo}`;
+                }
+            } catch (error) {
+                console.error("Error consultando la base de datos:", error);
+                document.getElementById('descMision').innerText = "Tu camino de vida y herramientas.";
+            }
+                // Vibración (Por ahora pondremos uno fijo hasta que tu API lo envíe)
+                //document.getElementById('numVibracion').innerText = "7";
+                //document.getElementById('txtGratitud').innerText = "la salud de mi familia y el nuevo proyecto que emprendo.";
+        }
+
+        async function cargarDatos() {
+            const data = JSON.parse(localStorage.getItem('usuarioInfo'));
+            if(!data) { window.location.href = 'login.html'; return; }
+
+            // 1. LLENAR HEADER (Usamos 'nombre' que es como lo tenías originalmente)
+            // Usamos un condicional por si acaso la propiedad se llama nombre o nombreCompleto
+            const nombreAMostrar =  data.nombre || data.nombreCompleto || "Viajero";
+            //document.getElementById('txtSaludo').innerText = `¡Hola, ${nombreAMostrar.split(' ')[0]}!`;
+            document.getElementById('txtSaludo').innerText = `¡Hola, ${nombreAMostrar}!`;
+
+            // Llenar Coordenadas (Asegúrate que los IDs coincidan con el nuevo HTML)
+            if(document.getElementById('txtSigno')) document.getElementById('txtSigno').innerText = data.datosAstro.signo;
+            if(document.getElementById('txtLuna')) document.getElementById('txtLuna').innerText = data.datosAstro.luna;
+            if(document.getElementById('txtElemento')) document.getElementById('txtElemento').innerText = data.datosAstro.elemento || 'Agua';
+
+            // 2. LLENAR NÚMEROS (Dashboard)
+            // Accedemos a datosNumerologia que es donde vive tu lógica de C#
+            const num = data.datosNumerologia;
+            const fecha = data.fechaNacimiento || data.FechaNacimiento;
+            
+
+            if(num) {
+                document.getElementById('numMision').innerText = num.mision;
+                document.getElementById('numAlma').innerText = num.alma;
+                document.getElementById('numDestino').innerText = num.destino;
+                document.getElementById('numPers').innerText = num.personalidad;
+                document.getElementById('numAñoPers').innerText = num.añoPersonal;
+                document.getElementById('numAñoUniv').innerText = num.añoUniversal;
+                document.getElementById('numVibracion').innerText = num.vibracionHoy;
+                document.getElementById('txtVibeMensaje').innerText = num.mensajeVibracion;
+            }
+
+            // 3. LLENAR GRATITUD
+            if(data.datosAstro.gratitud) {
+                document.getElementById('txtGratitud').innerText = data.datosAstro.gratitud;
+                document.getElementById('txtGratitudCat').innerText = data.datosAstro.gratitudCategoria;
+            }
+
+            // 4. CONSULTA A LA BASE DE DATOS PARA DESCRIPCIÓN
+            try {
+                const response = await fetch(`/api/significados/detalle/1/${num.mision}`);
+                if (response.ok) {
+                    const infoBD = await response.json();
+
+                    // Llenamos la descripción dinámica en el campo correspondiente
+                    if(document.getElementById('descMision')) {
+                        document.getElementById('descMision').innerText = infoBD.descripcionTema;
+                    }
+
+                    // Actualizamos el número con el apodo (Ej: 9 - El Humanitario)
+                    document.getElementById('numMision').innerText = `${num.mision} - ${infoBD.apodo}`;
+                }
+
+                 // Dentro de cargarDatos()...
+                const lunaHoy = getLunaActual();
+                document.getElementById('txtLunaActual').innerText = lunaHoy.nombre;
+                document.getElementById('iconoLunaActual').innerText = lunaHoy.icono;
+                // Guardamos para el modal
+                localStorage.setItem('lunaCieloHoy', lunaHoy.nombre);
+
+                // Calcular el regalo divino
+
+                if (fecha) {
+                    console.log("Fecha detectada:", fecha); // Verifica esto en la consola F12
+                    const numPoder = obtenerRegaloDivino(fecha);
+                    const txt = document.getElementById('txtSuperpoder');
+                    const numsup= document.getElementById('numSuperpoder');
+                    const dnumsup = numsup.outerText.split(' - ')[0].trim(); // Solo el número sin el apodo
+                    
+                    if (txt) {
+                        // Tomamos el nombre directamente del objeto global
+                        const nombre = CONFIG_NUMEROLOGIA.nombresPoderes[numPoder] || "Poder Despertando";
+                        txtSuperpoder.innerHTML = `<span style="font-size: 1.5rem; font-weight: bold;">${numPoder}</span> - ${nombre}`;
+                    }
+                } else {
+                    console.warn("La fecha de nacimiento no llegó al perfil.");
+                }
+
+            } catch (error) {
+                console.error("Error consultando la base de datos:", error);
+            }
+        }
+
+        // Función para calcular la fase lunar actual (Aproximación precisa)
+        function getLunaActual() {
+            const sely0 = 2451550.1; // Fecha base: Luna Nueva 6 Ene 2000
+            const precision = 29.530588853; // Ciclo lunar exacto
+            const ahora = new Date();
+            const jd = (ahora.getTime() / 86400000) - (ahora.getTimezoneOffset() / 1440) + 2440587.5;
+            const dias = jd - sely0;
+            const fase = (dias / precision) - Math.floor(dias / precision);
+
+            // Devolvemos el nombre según el porcentaje del ciclo
+            if (fase < 0.03 || fase > 0.97) return { nombre: "Luna Nueva", icono: "🌑" };
+            if (fase < 0.22) return { nombre: "Luna Creciente", icono: "🌒" };
+            if (fase < 0.28) return { nombre: "Cuarto Creciente", icono: "🌓" };
+            if (fase < 0.47) return { nombre: "Luna Gibosa", icono: "🌔" };
+            if (fase < 0.53) return { nombre: "Luna Llena", icono: "🌕" };
+            if (fase < 0.72) return { nombre: "Luna Diseminante", icono: "🌖" };
+            if (fase < 0.78) return { nombre: "Cuarto Menguante", icono: "🌗" };
+            return { nombre: "Luna Balsámica", icono: "🌘" };
+        }
+
+
+        async function cargarDatos_Prueba() {
+                // 1. Obtenemos la información que el usuario guardó en el localStorage (al registrarse/loguearse)
+                const data = JSON.parse(localStorage.getItem('usuarioInfo'));
+                if(!data) { window.location.href = 'login.html'; return; }
+
+                // --- A. LLENAR EL ENCABEZADO SUPERIOR ---
+
+                // Muestra el NOMBRE COMPLETO (Taylor García, por ejemplo)
+                document.getElementById('txtSaludo').innerText = `¡Hola, ${data.nombreCompleto}!`;
+
+                // Mostramos los datos básicos de la astrología (Capricornio, etc.)
+                document.getElementById('txtSigno').innerText = data.datosAstro.signo;
+                document.getElementById('txtLuna').innerText = data.datosAstro.luna;
+                document.getElementById('txtElemento').innerText = data.datosAstro.elemento || 'Agua'; // Valor por defecto por seguridad
+
+                // --- B. LLENAR LA TARJETA DE VIBRACIÓN ---
+
+                document.getElementById('numVibracion').innerText = data.datosNumerologia.vibracionHoy;
+
+                // Hacemos el mensaje de la vibración DINÁMICO, cargándolo del PDF que pusimos en el DbInitializer
+                try {
+                    // Consultamos el detalle del número actual del usuario para el Tema 1 (Misión)
+                    const response = await fetch(`/api/significados/detalle/1/${data.datosNumerologia.vibracionHoy}`);
+                    if (response.ok) {
+                        const infoBD = await response.json();
+
+                        // Usamos el 'apodo' o el 'mensajeMagico' del PDF para la tarjeta de vibración
+                        document.getElementById('txtVibeMensaje').innerText = infoBD.mensajeMagico;
+                    }
+                } catch (error) {
+                    console.error("Error cargando mensaje de vibración:", error);
+                }
+            }
+
+            // Llamar al cargar la página
+            document.addEventListener('DOMContentLoaded', cargarDatos);
+            function verDetalle_ant(tipo) {
+                const data = JSON.parse(localStorage.getItem('usuarioInfo'));
+                const modal = document.getElementById('miModal');
+                const titulo = document.getElementById('modalTitulo');
+                const texto = document.getElementById('modalTexto');
+
+                // Lógica para mostrar contenido según lo que clickeó
+                if(tipo === 'mision') {
+                    titulo.innerText = "Tu Misión de Vida: " + data.datosNumerologia.mision;
+                    texto.innerText = "Aquí irá el texto largo de tu libro sobre este número. Por ejemplo: El camino del líder, de la sanación o del maestro...";
+                }
+                if(tipo === 'alma') {
+                    titulo.innerText = "Tu Número del Alma: " + data.datosNumerologia.alma;
+                    texto.innerText = "Lo que tu ser interno realmente anhela y lo que viniste a experimentar en silencio...";
+                }
+
+                modal.style.display = "block";
+            }
+
+            function verDetalle_estatico(tipo) {
+                // 1. Obtenemos los datos que guardamos al hacer Login
+                const data = JSON.parse(localStorage.getItem('usuarioInfo'));
+                if (!data) return;
+
+                const modal = document.getElementById('miModal');
+                const titulo = document.getElementById('modalTitulo');
+                const texto = document.getElementById('modalTexto');
+
+                // Referencias a los nuevos campos de tu clase Significado
+                const apodo = document.getElementById('modalApodo');
+                const mision = document.getElementById('modalMision');
+                const reto = document.getElementById('modalReto');
+                const mantra = document.getElementById('modalMantra');
+                const amuleto = document.getElementById('modalAmuleto');
+                const mensaje = document.getElementById('modalMensajeMagico');
+
+                let numeroBuscar = 0;
+                let temaNombre = "";
+
+                // 2. Personalizamos el contenido del Modal según el clic
+                switch(tipo) {
+                    case 'mision':
+                        titulo.innerText = "Misión de Vida: " + data.datosNumerologia.mision;
+                        texto.innerText = "Tu misión representa el camino que tu alma ha elegido recorrer en esta encarnación. Es tu propósito mayor.";
+                        break;
+                    case 'alma':
+                        titulo.innerText = "Número del Alma: " + data.datosNumerologia.alma;
+                        texto.innerText = "Este número revela tus deseos más profundos, aquello que te motiva desde adentro y que pocos ven.";
+                        break;
+                    case 'destino':
+                        titulo.innerText = "Número de Destino: " + data.datosNumerologia.destino;
+                        texto.innerText = "Representa la dirección técnica de tu vida y las oportunidades que se te presentarán para evolucionar.";
+                        break;
+                    case 'personalidad':
+                        titulo.innerText = "Personalidad Externa: " + data.datosNumerologia.personalidad;
+                        texto.innerText = "Es la máscara que muestras al mundo, cómo te perciben los demás antes de conocer tu esencia.";
+                        break;
+                    case 'año-personal':
+                        titulo.innerText = "Tu Año Personal: " + data.datosNumerologia.añoPersonal;
+                        texto.innerText = "Esta es tu energía individual desde tu último cumpleaños. Marca el tono de tus desafíos personales actuales.";
+                        break;
+                    case 'año-universal':
+                        titulo.innerText = "Año Universal: " + data.datosNumerologia.añoUniversal;
+                        texto.innerText = "Es la frecuencia que envuelve al planeta entero este año (2026). Todos estamos bajo esta influencia.";
+                        break;
+                }
+
+            // 3. Mostramos el Modal (La ventana elegante)
+            modal.style.display = "block";
+        }
+
+            async function verDetalle(tipo) {
+                const data = JSON.parse(localStorage.getItem('usuarioInfo'));
+
+                // --- NUEVO: LIMPIEZA TOTAL PARA EVITAR REPETICIONES ---
+                    document.getElementById('modalApodo').innerText = "";
+                    document.getElementById('modalMision').innerText = "";
+                    document.getElementById('modalReto').innerText = "";
+                    document.getElementById('modalMantra').innerText = "";
+                    document.getElementById('modalAmuleto').innerText = "";
+                    document.getElementById('modalMensajeMagico').innerText = "";
+                // ------------------------------------------------------
+                if (!data) return;
+
+                const modal = document.getElementById('miModal');
+                const titulo = document.getElementById('modalTitulo');
+
+                // Referencias a los nuevos campos de tu clase Significado
+                const apodo = document.getElementById('modalApodo');
+                const mision = document.getElementById('modalMision');
+                const reto = document.getElementById('modalReto');
+                const mantra = document.getElementById('modalMantra');
+                const amuleto = document.getElementById('modalAmuleto');
+                const mensaje = document.getElementById('modalMensajeMagico');
+
+                let numeroBuscar = 0;
+                let temaNombre = "";
+
+                // 1. Mantenemos tu Switch para identificar qué buscar
+                switch(tipo) {
+                    case 'mision':
+                        numeroBuscar = data.datosNumerologia.mision;
+                        temaNombre = "Lección de Vida";
+                        titulo.innerText = "Misión de Vida: " + numeroBuscar;
+                        break;
+                    case 'alma':
+                        numeroBuscar = data.datosNumerologia.alma;
+                        temaNombre = "Alma";
+                        titulo.innerText = "Número del Alma: " + numeroBuscar;
+                        break;
+                    case 'destino':
+                        numeroBuscar = data.datosNumerologia.destino;
+                        temaNombre = "Destino";
+                        titulo.innerText = "Número de Destino: " + numeroBuscar;
+                        break;
+                    case 'personalidad':
+                        numeroBuscar = data.datosNumerologia.personalidad;
+                        temaNombre = "Personalidad";
+                        titulo.innerText = "Personalidad: " + numeroBuscar;
+                        break;
+                    case 'año-personal':
+                        numeroBuscar = data.datosNumerologia.añoPersonal;
+                        temaNombre = "Año Personal";
+                        titulo.innerText = "Tu Año Personal: " + numeroBuscar;
+                        break;
+                    case 'año-universal':
+                        numeroBuscar = data.datosNumerologia.añoUniversal;
+                        temaNombre = "Año Universal";
+                        titulo.innerText = "Año Universal: " + numeroBuscar;
+                        break;
+                }
+
+                // 2. Mostramos el modal y un mensaje de carga
+                modal.style.display = "block";
+                document.getElementById('loadingMsg').style.display = "block";
+                document.getElementById('modalCuerpo').style.display = "none";
+
+                // 3. ¡LA MAGIA! Vamos a la API por los datos de tu libro
+                try {
+                    //const response = await fetch(`/api/personas/significado/${temaNombre}/${numeroBuscar}`);
+                    // Codificamos el nombre del tema por si tiene espacios (como "Año Personal")
+                    const url = `/api/personas/significado/${encodeURIComponent(temaNombre)}/${numeroBuscar}`;
+                    const response = await fetch(url);
+                    if (response.ok) {
+                        const s = await response.json();
+
+                        // Llenamos los campos con tu clase Significado
+                        // apodo.innerText = s.apodo;
+                        // mision.innerText = s.mision;
+                        // reto.innerText = s.reto;
+                        // mantra.innerText = s.mantra;
+                        // amuleto.innerText = s.amuleto;
+                        // mensaje.innerText = s.mensaje;
+
+                        // ASIGNACIÓN: Aquí usamos los nombres exactos que devuelve tu JSON de C#
+                        apodo.innerText = s.apodo || "Sin apodo";
+                        mision.innerText = s.mision || "Información no disponible";
+                        reto.innerText = s.reto || "Sin reto asignado";
+                        mantra.innerText = s.mantra || "Sin mantra";
+                        amuleto.innerText = s.amuleto || "Sin amuleto";
+                        mensaje.innerText = s.mensajeMagico || "Sigue tu intuición"; // Coincide con tu columna MensajeMagico
+
+                        document.getElementById('loadingMsg').style.display = "none";
+                        document.getElementById('modalCuerpo').style.display = "block";
+                    } else {
+                        document.getElementById('loadingMsg').innerText = "Este conocimiento aún se está escribiendo...";
+                    }
+                } catch (error) {
+                    document.getElementById('loadingMsg').innerText = "Error de conexión con la sabiduría del sistema..";
+                }
+
+                document.getElementById('miModal').style.display = "block";
+                document.body.style.overflow = "hidden"; // BLOQUEA el scroll del fondo
+            }
+
+    // Función para cerrar
+            function cerrarModal() {
+                document.getElementById('miModal').style.display = "none";
+                document.body.style.overflow = "auto"; // DEVUELVE el scroll al cerrar
+            }
+
+
+            // Cerrar si hace clic fuera del cuadro
+            window.onclick = function(event) {
+                if (event.target == document.getElementById('miModal')) cerrarModal();
+            }
+
+            // Botón de Cerrar Sesión (Opcional)
+            function cerrarSesion() {
+            localStorage.removeItem('usuarioInfo');
+            window.location.href = 'login.html';
+        }
+            cargarDatos();
+
+            function abrirBitacora() {
+                document.getElementById('modalBitacora').style.display = "block";
+            }
+
+            function cerrarBitacora() {
+                document.getElementById('modalBitacora').style.display = "none";
+            }
+
+            function ajustarFormulario() {
+                const tipo = document.getElementById('tipoRegistro').value;
+                const divSincro = document.getElementById('divValorSincronico');
+                const label = document.getElementById('labelContenido');
+
+                divSincro.style.display = (tipo === 'Sincronicidad') ? "block" : "none";
+
+                if (tipo === 'Reto') label.innerText = "¿Cómo te sentiste al cumplir el reto?";
+                else if (tipo === 'Sincronicidad') label.innerText = "¿Qué estabas pensando en ese momento?";
+                else label.innerText = "¿Qué hay en tu corazón hoy?";
+            }
+
+            async function guardarEnBitacora() {
+                const data = JSON.parse(localStorage.getItem('usuarioInfo'));
+
+                const entrada = {
+                    personaId: data.id,
+                    tipo: document.getElementById('tipoRegistro').value,
+                    contenido: document.getElementById('contenidoBitacora').value,
+                    valorSincronico: document.getElementById('valorSincronico').value,
+                    fecha: new Date().toISOString()
+                };
+
+                const response = await fetch('/api/bitacora/registrar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(entrada)
+                });
+
+                if (response.ok) {
+                    todosLosRegistros = []; // Vaciamos para forzar recarga de la API
+                    alert("Tu registro ha sido guardado en la red del universo.");
+                    cerrarBitacora();
+                    cargarHistorialBitacora();
+                    // Limpiar campos
+                    document.getElementById('contenidoBitacora').value = "";
+                    // ¡ESTA ES LA LLAVE! Llamas a la IA para que analice lo que acabas de escribir
+                    await obtenerRetoSugerido();
+
+                }
+            }
+
+            function abrirHistorial() {
+                document.getElementById('modalHistorial').style.display = "block";
+                cargarHistorialBitacora('Todos'); // Llama a la función que ya hicimos antes
+            }
+
+            function cerrarHistorial() {
+                document.getElementById('modalHistorial').style.display = "none";
+            }
+            // Llamamos a esta función al cargar la página
+            document.addEventListener('DOMContentLoaded', () => {
+                cargarHistorialBitacora();
+            });
+
+            // Variable global para no pedirle los datos a la API cada vez que filtramos
+            let todosLosRegistros = [];
+
+            async function cargarHistorialBitacora(filtro = 'Todos') {
+                const user = JSON.parse(localStorage.getItem('usuarioInfo'));
+                if (!user) return;
+
+                const lista = document.getElementById('listaBitacora');
+
+                try {
+                    if (todosLosRegistros.length === 0) {
+                        const response = await fetch(`/api/bitacora/mis-registros/${user.id}`);
+                        if (response.ok) {
+                            todosLosRegistros = await response.json();
+                        }
+                    }
+
+                    // 1. Filtrado normal
+                    let registrosFiltrados = filtro === 'Todos'
+                        ? todosLosRegistros
+                        : todosLosRegistros.filter(r => r.tipo.trim().toLowerCase() === filtro.trim().toLowerCase());
+
+                    lista.innerHTML = "";
+
+                    if (registrosFiltrados.length === 0) {
+                        lista.innerHTML = `<div style="text-align:center; padding:30px; color:#999;">No hay registros de tipo <b>${filtro}</b>.</div>`;
+                        return;
+                    }
+
+                    // 2. LÓGICA DE AGRUPACIÓN: Separamos los que son Retos de los demás
+                    const gruposDeRetos = {};
+                    const registrosSueltos = [];
+
+                    registrosFiltrados.forEach(reg => {
+                        // Si es un reto y tiene ID, lo mandamos al grupo
+                        if (reg.tipo.trim().toLowerCase().includes("reto") && reg.retoId) {
+                            if (!gruposDeRetos[reg.retoId]) gruposDeRetos[reg.retoId] = [];
+                            gruposDeRetos[reg.retoId].push(reg);
+                        } else {
+                            registrosSueltos.push(reg);
+                        }
+                    });
+
+                    // 3. DIBUJAR RETOS AGRUPADOS (Línea de tiempo interna)
+                    for (const id in gruposDeRetos) {
+                        const pasos = gruposDeRetos[id].sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
+                        const esFinalizado = pasos.some(p => p.estadoReto === "Completado" && p.contenido.includes("🏁"));
+                        const fechaInicio = new Date(pasos[0].fecha).toLocaleDateString();
+
+                        lista.innerHTML += `
+                            <div class="card-historial-reto" style="border-left: 6px solid ${esFinalizado ? '#4caf50' : '#ff9800'}; background:#fff; margin-bottom:20px; padding:15px; border-radius:15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; border-bottom:1px solid #eee; padding-bottom:8px;">
+                                    <span style="font-weight:bold; color:#4a148c;">🚀 Reto: ${pasos[0].contenido.replace("Inicié el reto: ", "")}</span>
+                                    <span style="font-size:0.7rem; color:#888;">${fechaInicio}</span>
+                                </div>
+                                <div style="padding-left:10px; border-left: 2px dashed #ddd; margin-left:5px;">
+                                    ${pasos.map(p => `
+                                        <div style="margin-bottom:8px; font-size:0.9rem;">
+                                            <small style="color:#aaa; font-size:0.7rem;">${new Date(p.fecha).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</small>
+                                            <p style="margin:2px 0; color:#555;">${p.contenido.includes("Avance:") ? p.contenido.replace("📝 Avance: ", "• ") : p.contenido}</p>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                                ${esFinalizado ? `
+                                    <div style="text-align:right; margin-top:10px;">
+                                        <button onclick="compartirLogro(${id})" style="background:#4a148c; color:white; border:none; padding:5px 12px; border-radius:20px; font-size:0.8rem; cursor:pointer;">
+                                            ✨ Compartir Logro
+                                        </button>
+                                    </div>
+                                ` : ""}
+                            </div>
+                        `;
+                    }
+
+                    // 4. DIBUJAR REGISTROS SUELTOS (Sentimientos, Sincronías)
+                    registrosSueltos.forEach(reg => {
+                        const fecha = new Date(reg.fecha).toLocaleString([], { day:'2-digit', month:'2-digit', hour: '2-digit', minute:'2-digit' });
+                        const tipoClase = reg.tipo.trim().toLowerCase();
+                        let icono = "🧘"; let color = "#9c27b0";
+                        if (tipoClase.includes("sincro")) { icono = "🕒"; color = "#ff9800"; }
+
+                        lista.innerHTML += `
+                            <div class="item-bitacora" style="border-left: 5px solid ${color}; background:#fcfaff; margin-bottom:12px; padding:15px; border-radius:12px;">
+                                <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                                    <span style="font-size:0.7rem; color:#aaa;">${fecha}</span>
+                                    <span style="font-size:0.6rem; color:${color}; font-weight:bold;">${reg.tipo.toUpperCase()}</span>
+                                </div>
+                                <div style="display:flex;">
+                                    <span style="font-size:1.2rem; margin-right:10px;">${icono}</span>
+                                    <p style="margin:0; font-size:0.9rem; color:#444;">${reg.contenido}</p>
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                } catch (error) {
+                    console.error("Error en bitácora:", error);
+                    lista.innerHTML = "<p style='color:red;'>Error al cargar los datos.</p>";
+                }
+            }
+
+
+
+
+            async function cargarHistorialBitacora_SinAgrupar(filtro = 'Todos') {
+                const user = JSON.parse(localStorage.getItem('usuarioInfo'));
+                if (!user) return;
+
+                const lista = document.getElementById('listaBitacora');
+
+                try {
+                    // 1. Forzamos la carga de datos si la lista está vacía
+                    if (todosLosRegistros.length === 0) {
+                        const response = await fetch(`/api/bitacora/mis-registros/${user.id}`);
+                        if (response.ok) {
+                            todosLosRegistros = await response.json();
+                            console.log("Datos recibidos de la API:", todosLosRegistros); // Depuración
+                        }
+                    }
+
+                    // 2. Limpiamos el filtro y los datos para comparar sin errores de mayúsculas
+                    const registrosFiltrados = filtro === 'Todos'
+                        ? todosLosRegistros
+                        : todosLosRegistros.filter(r => r.tipo.trim().toLowerCase() === filtro.trim().toLowerCase());
+
+                    console.log("Registros después del filtro (" + filtro + "):", registrosFiltrados);
+
+                    // 3. Dibujamos en el HTML
+                    if (registrosFiltrados.length === 0) {
+                        lista.innerHTML = `<div style="text-align:center; padding:30px; color:#999;">
+                            <p>No hay registros de tipo <b>${filtro}</b> todavía.</p>
+                        </div>`;
+                        return;
+                    }
+
+                    lista.innerHTML = "";
+                    registrosFiltrados.forEach(reg => {
+                        const fecha = new Date(reg.fecha).toLocaleString([], { day:'2-digit', month:'2-digit', hour: '2-digit', minute:'2-digit' });
+
+                        // Normalizamos el tipo para el diseño
+                        const tipoClase = reg.tipo.trim().toLowerCase();
+                        let icono = "📔";
+                        let color = "#2196f3";
+
+                        if (tipoClase.includes("sincro")) { icono = "🕒"; color = "#ff9800"; }
+                        else if (tipoClase.includes("reto")) { icono = "✅"; color = "#4caf50"; }
+
+                        lista.innerHTML += `
+                            <div class="item-bitacora" style="border-left: 5px solid ${color}; background:#fff; margin-bottom:12px; padding:15px; border-radius:12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                                    <span style="font-size:0.75rem; color:#aaa; font-weight:bold;">${fecha}</span>
+                                    <span style="font-size:0.65rem; background:${color}22; color:${color}; padding:2px 8px; border-radius:10px; font-weight:bold; text-transform:uppercase;">${reg.tipo}</span>
+                                </div>
+                                <div style="display:flex; align-items:flex-start;">
+                                    <span style="font-size:1.4rem; margin-right:12px;">${icono}</span>
+                                    <div>
+                                        ${reg.valorSincronico ? `<div style="color:${color}; font-weight:bold; font-size:0.9rem; margin-bottom:4px;">Señal: ${reg.valorSincronico}</div>` : ""}
+                                        <p style="margin:0; color:#444; font-size:0.95rem; line-height:1.4;">${reg.contenido}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                } catch (error) {
+                    console.error("Error en bitácora:", error);
+                    lista.innerHTML = "<p style='color:red; text-align:center;'>Error al cargar los datos.</p>";
+                }
+            }
+
+            // async function cargarHistorialBitacora(filtro = 'Todos') {
+            //     const user = JSON.parse(localStorage.getItem('usuarioInfo'));
+            //     if (!user) return;
+
+            //     const lista = document.getElementById('listaBitacora');
+
+            //     try {
+            //         // Solo llamamos a la API si la lista global está vacía (optimización)
+            //         if (todosLosRegistros.length === 0) {
+            //             const response = await fetch(`/api/bitacora/mis-registros/${user.id}`);
+            //             if (response.ok) {
+            //                 todosLosRegistros = await response.json();
+            //             }
+            //         }
+
+            //         // Aplicamos el filtro sobre los datos que ya tenemos
+            //         const registrosFiltrados = filtro === 'Todos'
+            //             ? todosLosRegistros
+            //             : todosLosRegistros.filter(r => r.tipo === filtro);
+
+            //         // Dibujamos en el HTML
+            //         if (registrosFiltrados.length === 0) {
+            //             lista.innerHTML = `<p style="text-align:center; padding:20px; color:#999;">No hay registros de tipo "${filtro}" todavía.</p>`;
+            //             return;
+            //         }
+
+            //         lista.innerHTML = ""; // Limpiar
+            //         registrosFiltrados.forEach(reg => {
+            //             const fecha = new Date(reg.fecha).toLocaleDateString() + " " + new Date(reg.fecha).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
+            //             let icono = "📔";
+            //             let color = "#2196f3"; // Azul para sentir
+            //             if (reg.tipo === "Sincronicidad") { icono = "🕒"; color = "#ff9800"; }
+            //             if (reg.tipo === "Reto") { icono = "✅"; color = "#4caf50"; }
+
+            //             lista.innerHTML += `
+            //                 <div class="item-bitacora" style="border-left: 5px solid ${color}; background:#fcfcfc; margin-bottom:15px; padding:15px; border-radius:10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+            //                     <span style="font-size:0.7rem; color:#888;">${fecha}</span>
+            //                     <div style="display:flex; align-items:flex-start; margin-top:5px;">
+            //                         <span style="font-size:1.5rem; margin-right:12px;">${icono}</span>
+            //                         <div>
+            //                             ${reg.valorSincronico ? `<b style="color:${color};">Señal: ${reg.valorSincronico}</b><br>` : ""}
+            //                             <p style="margin:0; color:#444; font-size:0.9rem;">${reg.contenido}</p>
+            //                         </div>
+            //                     </div>
+            //                 </div>
+            //             `;
+            //         });
+
+            //     } catch (error) {
+            //         console.error("Error al cargar historial:", error);
+            //         lista.innerHTML = "Error al conectar con tu historial.";
+            //     }
+            // }
+            // async function cargarHistorialBitacora() {
+            //     const user = JSON.parse(localStorage.getItem('usuarioInfo'));
+            //     if (!user) return;
+
+            //     try {
+            //         const response = await fetch(`/api/bitacora/mis-registros/${user.id}`);
+            //         if (response.ok) {
+            //             const registros = await response.json();
+            //             const lista = document.getElementById('listaBitacora');
+
+            //             if (registros.length === 0) {
+            //                 lista.innerHTML = "<p style='text-align:center; color:#999;'>Aún no hay registros en tu bitácora. ¡Empieza hoy!</p>";
+            //                 return;
+            //             }
+
+            //             lista.innerHTML = ""; // Limpiar mensaje de carga
+
+            //             registros.forEach(reg => {
+            //                 const fecha = new Date(reg.fecha).toLocaleDateString() + " " + new Date(reg.fecha).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
+            //                 // Elegimos el icono según el tipo
+            //                 let icono = "📔";
+            //                 if (reg.tipo === "Sincronicidad") icono = "🕒";
+            //                 if (reg.tipo === "Reto") icono = "✅";
+
+            //                 lista.innerHTML += `
+            //                     <div class="item-bitacora tipo-${reg.tipo}">
+            //                         <span class="fecha-bitacora">${fecha} <span class="badge-tipo">${reg.tipo}</span></span>
+            //                         <div style="display: flex; align-items: center;">
+            //                             <span style="font-size: 1.5rem; margin-right: 15px;">${icono}</span>
+            //                             <div>
+            //                                 ${reg.valorSincronico ? `<strong style="color:#e65100;">Señal: ${reg.valorSincronico}</strong><br>` : ""}
+            //                                 <p style="margin: 5px 0; color: #444;">${reg.contenido}</p>
+            //                             </div>
+            //                         </div>
+            //                     </div>
+            //                 `;
+            //             });
+            //         }
+            //     } catch (error) {
+            //         console.error("Error al cargar bitácora:", error);
+            //     }
+            // }
+
+            // ACTUALIZACIÓN: Modifica tu función guardarEnBitacora para que refresque la lista
+            // Al final de la función guardarEnBitacora(), dentro del if(response.ok), añade:
+            // cargarHistorialBitacora();
+
+            async function obtenerRetoSugerido() {
+                const user = JSON.parse(localStorage.getItem('usuarioInfo'));
+                if (!user) return;
+
+                try {
+                    // Llamamos al nuevo endpoint que sabe si el reto es "Sugerido" o "En Curso"
+                    const response = await fetch(`/api/retos/obtener-estado/${user.id}`);
+
+                    if (response.ok) {
+                        const data = await response.json();
+
+                        // 1. Mostramos el contenedor y llenamos los textos básicos
+                        document.getElementById('contenedorReto').style.display = "block";
+                        document.getElementById('retoTitulo').innerText = data.titulo;
+                        document.getElementById('retoDesc').innerText = data.descripcion;
+
+                        // 2. Guardamos IDs importantes en memoria local
+                        localStorage.setItem('retoActualId', data.id);
+                        if (data.bitacoraId) {
+                            localStorage.setItem('bitacoraRetoId', data.bitacoraId);
+                        }
+
+                        // 3. ¡LA UNIFICACIÓN! Decidimos qué botones mostrar según el estado
+                        if (data.estado === "En Curso") {
+                            // Si ya lo aceptó antes, mostramos directo el área de escritura
+                            document.getElementById('seccionAceptar').style.display = "none";
+                            document.getElementById('seccionSeguimiento').style.display = "block";
+                            document.getElementById('tagEstado').innerText = "🚀 Reto en Curso";
+                            document.getElementById('tagEstado').style.background = "#d4af37"; // Dorado
+                        } else {
+                            // Si es solo una sugerencia nueva (tu lógica original)
+                            document.getElementById('seccionAceptar').style.display = "block";
+                            document.getElementById('seccionSeguimiento').style.display = "none";
+                            document.getElementById('tagEstado').innerText = "🌟 Reto Sugerido";
+                            document.getElementById('tagEstado').style.background = "rgba(255,255,255,0.2)";
+                        }
+                    } else {
+                        // Si la API responde 404 (no hay sentimientos o no hay retos activos)
+                        document.getElementById('contenedorReto').style.display = "none";
+                    }
+                } catch (error) {
+                    console.log("No hay retos pendientes o error de conexión.");
+                    document.getElementById('contenedorReto').style.display = "none";
+                }
+            }
+            // async function obtenerRetoSugerido_ant() {
+            //     const user = JSON.parse(localStorage.getItem('usuarioInfo'));
+            //     if (!user) return;
+
+            //     try {
+            //         const response = await fetch(`/api/retos/sugerir/${user.id}`);
+            //         if (response.ok) {
+            //             const reto = await response.json();
+
+            //             document.getElementById('contenedorReto').style.display = "block";
+            //             document.getElementById('retoTitulo').innerText = reto.titulo;
+            //             document.getElementById('retoDesc').innerText = reto.descripcion;
+
+            //             // Guardamos el ID del reto para cuando le de a "Cumplido"
+            //             localStorage.setItem('retoActualId', reto.id);
+            //         }
+            //     } catch (error) {
+            //         console.log("No hay retos pendientes.");
+            //     }
+            // }
+
+            // // Llama a esta función al final de guardarEnBitacora() si el tipo fue 'Sentimiento'
+            // // Y también en el DOMContentLoaded
+            // document.addEventListener('DOMContentLoaded', () => {
+            //     cargarHistorialBitacora();
+            //     obtenerRetoSugerido();
+            // });
+
+            let idRetoActivo = null;
+
+            async function aceptarReto() {
+                const user = JSON.parse(localStorage.getItem('usuarioInfo'));
+                const retoId = localStorage.getItem('retoActualId'); // El ID del reto que sugerimos
+                const titulo = document.getElementById('retoTitulo').innerText;
+
+                if (!retoId) {
+                    alert("Error: No se encontró el ID del reto.");
+                    return;
+                }
+                // Creamos un registro en Bitacora con estado 'En Curso'
+                const entrada = {
+                    personaId: user.id,
+                    retoId: parseInt(retoId), // Convertimos a número para C#
+                    tipo: "Reto",
+                    contenido: `Inicié el reto: ${titulo}`,
+                    fecha: new Date().toISOString(),
+                    estadoReto: "En Curso" // <--- ESTO ES LO QUE HACE QUE SE QUEDE PEGADO
+                };
+                try {
+                            const response = await fetch('/api/bitacora/registrar', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(entrada)
+                            });
+
+                            if (response.ok) {
+                                const resultado = await response.json();
+                                // Guardamos el ID de este registro de bitácora para poder finalizarlo luego
+                                localStorage.setItem('bitacoraRetoId', resultado.id);
+                                // Limpiamos la memoria local de bitácora para forzar recarga
+                                todosLosRegistros = [];
+                                // Cambiamos la interfaz visualmente sin recargar
+                                mostrarModoSeguimiento();
+                                // Volvemos a obtener el estado para asegurar que localStorage tenga el bitacoraId nuevo
+                                await obtenerRetoSugerido();
+                                alert("¡Reto aceptado! Aparecerá en tu perfil hasta que lo finalices.");
+                            }
+                    }
+                    catch (error) {
+                        console.error("Error al aceptar reto:", error);
+                    }
+            }
+
+            function mostrarModoSeguimiento() {
+                document.getElementById('seccionAceptar').style.display = "none";
+                document.getElementById('seccionSeguimiento').style.display = "block";
+                document.getElementById('tagEstado').innerText = "🚀 Reto en curso";
+                document.getElementById('tagEstado').style.background = "#d4af37";
+            }
+
+            async function guardarAvance() {
+                const textoAvance = document.getElementById('avanceReto').value;
+                if (!textoAvance) return;
+
+                const user = JSON.parse(localStorage.getItem('usuarioInfo'));
+                const entrada = {
+                    personaId: user.id,
+                    tipo: "Reto", // Lo guardamos como sentimiento vinculado al reto
+                    contenido: "📝 Avance: " + textoAvance,
+                    fecha: new Date().toISOString(),
+                    estadoReto: "Completado", // antes En Curso porque se Mantenemos el estado para que sepa que es seguimiento
+                    retoId: parseInt(localStorage.getItem('retoActualId')) // Mantenemos el vínculo
+                };
+
+                const response = await fetch('/api/bitacora/registrar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(entrada)
+                });
+
+                if (response.ok) {
+                    alert("Avance guardado en tu historial.");
+                    document.getElementById('avanceReto').value = "";
+                    todosLosRegistros = []; // Limpiamos para que se actualice el historial
+                }
+            }
+
+            function finalizarRetoBasico() {
+                if(confirm("¿Has completado esta etapa de tu transformación?")) {
+                    document.getElementById('contenedorReto').style.fadeOut;
+                    document.getElementById('contenedorReto').style.display = "none";
+                    alert("¡Felicidades! Reto completado.");
+                    // Aquí podrías llamar a la API para marcarlo como finalizado si quieres ser más estricto
+                }
+            }
+
+            async function finalizarReto() {
+            // 1. Recuperamos TODO lo necesario antes de empezar
+            const bitacoraId = localStorage.getItem('bitacoraRetoId');
+            const retoId = localStorage.getItem('retoActualId');
+            const userInfo = JSON.parse(localStorage.getItem('usuarioInfo'));
+            const tituloReto = document.getElementById('retoTitulo').innerText;
+
+            if (!bitacoraId) {
+                alert("No se encontró el identificador del reto activo.");
+                return;
+            }
+
+            if (confirm("¿Has completado esta etapa de tu transformación?")) {
+                try {
+
+                    // 2. Avisamos al servidor que el reto está COMPLETADO (el PUT que hicimos)
+                    const response = await fetch(`/api/bitacora/finalizar-reto/${bitacoraId}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+
+                    if (response.ok) {
+                        // 3. CREAMOS UN REGISTRO DE CIERRE para la bitácora (opcional pero recomendado para tener un historial claro)
+                        // Esto es lo que aparecerá en el historial con la hora de ahorita
+
+                        const cierre = {
+                            personaId: userInfo.id,
+                            retoId: parseInt(retoId),
+                            tipo: "Reto",
+                            contenido: `🏁 Reto Finalizado: ${tituloReto}. ¡Misión cumplida!`,
+                            fecha: new Date().toISOString(), // Hora exacta del cierre
+                            estadoReto: "Completado"
+                        };
+
+
+                        await fetch('/api/bitacora/registrar', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(cierre)
+                        });
+
+                        const data = await response.json();
+
+                        //4. Limpieza visual y alertas
+                        document.getElementById('contenedorReto').style.display = "none";
+
+                        // alert(data.mensaje + "\n\n" + data.recompensa);
+                        // alert("¡Felicidades por completar este ciclo!");
+                        alert(data.mensaje || "¡Felicidades por completar este ciclo!");
+
+                    // 5. Limpiamos memoria local
+
+
+                        localStorage.removeItem('bitacoraRetoId');
+                        localStorage.removeItem('retoActualId');
+
+                        // 6.Refrescamos el historial para que aparezca como completado
+                        todosLosRegistros = [];
+                        cargarHistorialBitacora();
+                    }
+                    else {
+                        alert("El servidor no pudo actualizar el reto.");
+                    }
+                } catch (error) {
+                    console.error("Error técnico:", error);
+                    alert("Hubo un problema al conectar con el servidor.");
+                }
+            }
+        }
+
+        function renderizarHistorialAgrupado_V1(registros) {
+            const contenedor = document.getElementById('listaBitacora');
+            contenedor.innerHTML = "";
+
+            // 1. Separamos los registros: Los que son "Reto" los agrupamos por su ID
+            const gruposDeRetos = {};
+            const otrosRegistros = [];
+
+            registros.forEach(reg => {
+                if (reg.tipo === "Reto" && reg.retoId) {
+                    if (!gruposDeRetos[reg.retoId]) {
+                        gruposDeRetos[reg.retoId] = [];
+                    }
+                    gruposDeRetos[reg.retoId].push(reg);
+                } else {
+                    otrosRegistros.push(reg);
+                }
+            });
+
+            // 2. Renderizamos los bloques de Retos
+            for (const id in gruposDeRetos) {
+                const pasos = gruposDeRetos[id].sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
+                const primerPaso = pasos[0]; // El inicio
+                const esCompletado = pasos.some(p => p.contenido.includes("🏁"));
+
+                const cardReto = `
+                    <div class="card-historial-reto ${esCompletado ? 'reto-finalizado' : ''}">
+                        <div class="reto-header">
+                            <span class="icon">${esCompletado ? '✅' : '🚀'}</span>
+                            <div class="reto-info">
+                                <strong>${primerPaso.contenido.replace("Inicié el reto: ", "")}</strong>
+                                <small>${new Date(primerPaso.fecha).toLocaleDateString()}</small>
+                            </div>
+                        </div>
+                        <div class="reto-detalles">
+                            ${pasos.map(p => `
+                                <div class="paso-bitacora">
+                                    <span class="hora">${new Date(p.fecha).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                                    <p>${p.contenido.includes("Avance:") ? p.contenido.replace("📝 Avance: ", "• ") : p.contenido}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+                contenedor.innerHTML += cardReto;
+            }
+
+            // 3. Renderizamos el resto (Sentimientos, Sincronicidades)
+            otrosRegistros.forEach(reg => {
+                // ... (Tu código actual para mostrar sentimientos normales)
+            });
+        }
+
+        function renderizarHistorialAgrupado(registros) {
+            const contenedor = document.getElementById('listaBitacora');
+            contenedor.innerHTML = ""; // Limpiamos
+
+            const gruposDeRetos = {};
+            const otrosRegistros = [];
+
+            // 1. Clasificamos
+            registros.forEach(reg => {
+                if (reg.tipo === "Reto" && reg.retoId) {
+                    if (!gruposDeRetos[reg.retoId]) gruposDeRetos[reg.retoId] = [];
+                    gruposDeRetos[reg.retoId].push(reg);
+                } else {
+                    otrosRegistros.push(reg);
+                }
+            });
+
+            // 2. Dibujamos los Retos Agrupados (Línea de tiempo)
+            for (const id in gruposDeRetos) {
+                // Ordenamos los pasos por fecha (del más viejo al más nuevo)
+                const pasos = gruposDeRetos[id].sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
+                const esCompletado = pasos.some(p => p.estadoReto === "Completado" && p.contenido.includes("🏁"));
+
+                const htmlReto = `
+                    <div class="card-historial-reto ${esCompletado ? 'reto-finalizado' : ''}">
+                        <div class="reto-header">
+                            <span>${esCompletado ? '✅' : '🚀'}</span>
+                            <strong>Reto: ${pasos[0].contenido.replace("Inicié el reto: ", "")}</strong>
+                        </div>
+                        <div class="reto-detalles">
+                            ${pasos.map(p => `
+                                <div class="paso-bitacora">
+                                    <small>${new Date(p.fecha).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</small>
+                                    <p>${p.contenido}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                        ${esCompletado ? `<button class="btn-exportar" onclick="compartirLogro(${id})">Compartir Logro ✨</button>` : ''}
+                    </div>
+                `;
+                contenedor.innerHTML += htmlReto;
+            }
+
+            // 3. Dibujamos los Sentimientos/Sincronicidades (como antes)
+            otrosRegistros.forEach(reg => {
+                const icon = reg.tipo === "Sentimiento" ? "🧘" : "✨";
+                const html = `
+                    <div class="item-bitacora">
+                        <span>${icon}</span>
+                        <p>${reg.contenido}</p>
+                        <small>${new Date(reg.fecha).toLocaleString()}</small>
+                    </div>
+                `;
+                contenedor.innerHTML += html;
+            });
+        }
+
+        async function compartirLogro_v1(retoId) {
+            // 1. Buscamos los datos (Asegúrate de usar == para comparar string con número)
+            const registrosDelReto = todosLosRegistros.filter(r => r.retoId == retoId);
+            if (registrosDelReto.length === 0) {
+                alert("No se encontraron datos para este reto.");
+                return;
+            }
+
+            // 2. Buscamos el título real
+            const inicio = registrosDelReto.find(r => r.tipo.toLowerCase().includes("reto") && r.contenido.includes("Inicié"));
+            const tituloReto = inicio ? inicio.contenido.replace("Inicié el reto: ", "") : "Un paso de luz";
+
+            const mensaje = `✨ Mi Historia de Transformación ✨\n\n` +
+                            `He completado con éxito el reto: "${tituloReto}" 🚀\n\n` +
+                            `En mi camino de consciencia, hoy celebro mi evolución.\n\n` +
+                            `🙏 Numerología Sagrada`;
+
+            // 3. INTENTO 1: Menú Nativo (Celulares)
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: 'Mi Logro',
+                        text: mensaje
+                    });
+                    return; // Si funcionó, salimos
+                } catch (err) {
+                    console.log("Compartir cancelado o fallido");
+                }
+            }
+
+            // 4. INTENTO 2: Portapapeles (PC/Laptops)
+            // Usamos un método más compatible para copiar
+            try {
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(mensaje);
+                    alert("✨ ¡Copiado al portapapeles! Ya puedes pegarlo en WhatsApp.");
+                } else {
+                    // PLAN C: El método antiguo de "Select & Copy" para navegadores viejos o HTTP
+                    const textArea = document.createElement("textarea");
+                    textArea.value = mensaje;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    alert("✨ ¡Logro copiado con éxito!");
+                }
+            } catch (err) {
+                console.error("Error final:", err);
+                alert("¡Felicidades por tu logro! (No pude copiar el texto, intenta capturar pantalla)");
+            }
+        }
+
+        async function compartirLogro_v2(retoId) {
+            const registrosDelReto = todosLosRegistros.filter(r => r.retoId == retoId);
+            if (registrosDelReto.length === 0) return;
+
+            // 1. Obtener datos para el Diploma
+            const inicio = registrosDelReto.find(r => r.contenido.includes("Inicié"));
+            const tituloReto = inicio ? inicio.contenido.replace("Inicié el reto: ", "") : "Evolución Sagrada";
+            const fechaFin = new Date().toLocaleDateString();
+
+            // 2. Mostrar el Diploma Visual
+            document.getElementById('diplomaTituloReto').innerText = tituloReto;
+            document.getElementById('diplomaFecha').innerText = "Completado el " + fechaFin;
+            document.getElementById('modalDiploma').style.display = 'flex';
+
+            // 3. Preparar mensaje con tu URL
+            const urlApp = "https://tu-sitio-web.com"; // <-- CAMBIA ESTO POR TU URL REAL
+            const mensaje = `✨ ¡HE LOGRADO UNA TRANSFORMACIÓN! ✨\n\n` +
+                            `Acabo de completar el reto: "${tituloReto}" 🚀\n\n` +
+                            `Te invito a iniciar tu propia bitácora y descubrir tus señales aquí:\n` +
+                            `👉 ${urlApp}\n\n` +
+                            `🙏 #Numerología #Consciencia #Evolución`;
+
+            // 4. Intentar copiar/compartir
+            if (navigator.share) {
+                try {
+                    await navigator.share({ title: 'Mi Evolución', text: mensaje, url: urlApp });
+                } catch (err) { console.log("Compartir cancelado"); }
+            } else {
+                const textArea = document.createElement("textarea");
+                textArea.value = mensaje;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                alert("✨ ¡Diploma generado y mensaje copiado! Pégalo en tu WhatsApp.");
+            }
+        }
+
+        async function compartirLogro(retoId) {
+            // Buscamos los registros que pertenecen a este reto (usamos == por si uno es string y otro int)
+            const registrosDelReto = todosLosRegistros.filter(r => r.retoId == retoId);
+
+            if (registrosDelReto.length === 0) {
+                console.error("No se encontraron registros para el reto:", retoId);
+                return;
+            }
+
+            // --- A. OBTENER DATOS REALES ---
+
+            // Buscamos el título en el registro de inicio
+            const inicio = registrosDelReto.find(r => r.contenido.includes("Inicié"));
+            const tituloReto = inicio ? inicio.contenido.replace("Inicié el reto: ", "") : "Evolución Sagrada";
+            const fechaFin = new Date().toLocaleDateString();
+
+            // Obtenemos el nombre real del usuario desde el localStorage
+            const user = JSON.parse(localStorage.getItem('usuarioInfo'));
+            // Prioridad: Nombre Completo -> Nombre -> 'Buscador de Luz'
+            const nombreParaDiploma = user ? (user.nombreCompleto || user.nombre || "Buscador de Luz") : "Buscador de Luz";
+
+            // --- B. ACTUALIZAR Y MOSTRAR DIPLOMA VISUAL ---
+
+            const divNombre = document.getElementById('diplomaNombreUsuario');
+            const divTitulo = document.getElementById('diplomaTituloReto');
+            const divFecha = document.getElementById('diplomaFecha');
+            const modal = document.getElementById('modalDiploma');
+
+            if (divNombre) divNombre.innerText = nombreParaDiploma;
+            if (divTitulo) divTitulo.innerText = tituloReto;
+            if (divFecha) divFecha.innerText = "Integrado con éxito el " + fechaFin;
+            if (modal) modal.style.display = 'flex';
+
+            // --- C. PREPARAR MENSAJE PARA COMPARTIR ---
+
+            const urlApp = "https://tu-sitio-web.com/bitacora"; // <-- CAMBIA ESTO POR TU URL REAL
+            const mensaje = `✨ ¡DIPLOMA DE TRANSFORMACIÓN! ✨\n\n` +
+                            `Certifico que he completado el reto: "${tituloReto}" 🚀\n\n` +
+                            `Te invito a iniciar tu propia bitácora y descubrir tus señales aquí:\n` +
+                            `👉 ${urlApp}\n\n` +
+                            `🙏 #Numerología #Consciencia #Evolución`;
+
+            // --- D. EJECUTAR ACCIÓN DE COMPARTIR ---
+
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: 'Mi Evolución Espiritual',
+                        text: mensaje,
+                        url: urlApp
+                    });
+                } catch (err) {
+                    console.log("Compartir nativo cancelado o fallido");
+                }
+            } else {
+                // Plan B: Copia al portapapeles (Robusto para HTTP y PC)
+                try {
+                    const textArea = document.createElement("textarea");
+                    textArea.value = mensaje;
+                    // Aseguramos que no se vea en pantalla mientras copia
+                    textArea.style.position = "fixed";
+                    textArea.style.left = "-9999px";
+                    textArea.style.top = "0";
+                    document.body.appendChild(textArea);
+                    textArea.focus();
+                    textArea.select();
+
+                    const exitoso = document.execCommand('copy');
+                    document.body.removeChild(textArea);
+
+                    if (exitoso) {
+                        alert("✨ ¡Diploma generado y mensaje copiado! Ya puedes pegarlo en tu WhatsApp.");
+                    }
+                } catch (err) {
+                    console.error("Error al copiar:", err);
+                    alert("¡Felicidades por tu logro! Toma una captura de pantalla de tu diploma para compartir.");
+                }
+            }
+        }
+
+        function cerrarDiploma() {
+            const modal = document.getElementById('modalDiploma');
+            if (modal) modal.style.display = 'none';
+        }
+
+
+        function prepararCaptura() {
+            // 1. Buscamos el contenedor de los botones
+            const contenedorBotones = document.querySelector('#modalDiploma div[style*="flex"]');
+
+            // 2. Los ocultamos temporalmente
+            contenedorBotones.style.opacity = "0";
+            contenedorBotones.style.pointerEvents = "none";
+
+            // 3. Avisamos al usuario (opcional, para que se prepare)
+            // Usamos un pequeño delay para que el alert no salga en la captura si el usuario es rápido
+            setTimeout(() => {
+                alert("✨ ¡Pantalla lista! Toma tu captura ahora. Los botones volverán en 5 segundos.");
+            }, 100);
+
+            // 4. Los volvemos a mostrar después de 5 segundos
+            setTimeout(() => {
+                contenedorBotones.style.opacity = "1";
+                contenedorBotones.style.pointerEvents = "auto";
+            }, 5000);
+        }
+
+        async function abrirModalAstro(tipo) {
+
+            const data = JSON.parse(localStorage.getItem('usuarioInfo'));
+            if (!data) return;
+
+            // Determinamos qué nombre buscar según el tipo
+            let nombreBusqueda = "";
+            if (tipo === 'signo') nombreBusqueda = data.datosAstro.signo;
+            if (tipo === 'luna') nombreBusqueda = data.datosAstro.luna;
+            if (tipo === 'elemento') nombreBusqueda = data.datosAstro.elemento;
+            if (tipo === 'lunaActual') nombreBusqueda = document.getElementById('txtLunaActual').innerText;
+
+            // 2. Corregir el tipo para el API (Si es lunaActual, pedimos 'luna')
+            const tipoParaApi = tipo === 'lunaActual' ? 'luna' : tipo;
+
+            try {
+                
+                //const response = await fetch(`/api/astro/detalle/${tipoParaApi}/${nombreBusqueda}`);
+                const url = `/api/astro/detalle/${tipoParaApi}/${encodeURIComponent(nombreBusqueda)}`;
+                const response = await fetch(url);
+                //const response = await fetch(`/api/astro/detalle/${tipo}/${nombreBusqueda}`);
+                //const response = await fetch(`/api/astro/detalle/${tipo === 'lunaActual' ? 'luna' : tipo}/${encodeURIComponent(nombreBusqueda)}`);
+                if (response.ok) {
+                    const info = await response.json();
+
+                    // Llenamos el Modal con la info de la Base de Datos
+                    document.getElementById('astroIcono').innerText = info.icono;
+                    document.getElementById('astroTitulo').innerText = info.nombre;
+
+                    // Adaptamos según el tipo de tabla que venga
+                    if (tipo === 'signo') {
+                        document.getElementById('astroDefinicion').innerText = "Tu Esencia Solar";
+                        document.getElementById('astroDetalle').innerHTML = `<strong>Sabiduría:</strong> ${info.descripcion}`;
+                    } else if (tipo === 'luna') {
+                        document.getElementById('astroDefinicion').innerText = info.significadoEspiritual;
+                        document.getElementById('astroDetalle').innerHTML = `<strong>Recomendación:</strong> ${info.recomendacion}`;
+                    } else if (tipo === 'elemento') {
+                        document.getElementById('astroDefinicion').innerText = info.esencia;
+                        document.getElementById('astroDetalle').innerHTML = `<strong>Naturaleza:</strong> ${info.descripcion}`;
+                    } else if (tipo === 'lunaActual') {
+                        
+                        document.getElementById('astroDefinicion').innerText = info.significadoEspiritual;
+                        document.getElementById('astroDetalle').innerHTML = `<strong>Recomendación:</strong> ${info.recomendacion}`;
+                        // const nombreLunaHoy = localStorage.getItem('lunaCieloHoy');
+
+                        // // Llamamos a tu API para traer la recomendación del libro de esa luna
+                        // const response = await fetch(`/api/astro/detalle/luna/${nombreLunaHoy}`);
+                        // if (response.ok) {
+                        //     const info = await response.json();
+                        //     document.getElementById('astroIcono').innerText = info.icono;
+                        //     document.getElementById('astroTitulo').innerText = "El Cielo Hoy: " + info.nombre;
+                        //     document.getElementById('astroDefinicion').innerText = "Energía Colectiva Actual";
+                        //     document.getElementById('astroDetalle').innerHTML = `
+                        //         <p><strong>Clima Espiritual:</strong> ${info.significadoEspiritual}</p>
+                        //         <hr style="border:0; border-top:1px solid #ddd; margin:10px 0;">
+                        //         <p><strong>Sugerencia del Libro:</strong> ${info.recomendacion}</p>
+                        //     `;
+                        //     document.getElementById('modalAstro').style.display = 'flex';
+                        // }
+                    }
+
+                    document.getElementById('modalAstro').style.display = 'flex';
+                }
+            } catch (error) {
+                console.error("Error al conectar con el oráculo:", error);
+            }
+        }
+
+
+        function abrirModalAstroQuemadaInfo(tipo) {
+            const data = JSON.parse(localStorage.getItem('usuarioInfo'));
+            if (!data) return;
+
+            const modal = document.getElementById('modalAstro');
+            const titulo = document.getElementById('astroTitulo');
+            const icono = document.getElementById('astroIcono');
+            const definicion = document.getElementById('astroDefinicion');
+            const detalle = document.getElementById('astroDetalle');
+
+            // Limpiamos contenido previo
+            detalle.innerHTML = "";
+
+            if (tipo === 'signo') {
+                icono.innerText = "♈";
+                titulo.innerText = data.datosAstro.signo;
+                definicion.innerText = "Tu Signo Solar: Representa tu esencia, tu ego y la forma en que brillas ante el mundo.";
+                detalle.innerHTML = `
+                    <strong>Significado:</strong> Determinado por la posición del Sol en el momento de tu nacimiento.
+                    Define tu carácter básico y tus impulsos fundamentales de vida.
+                `;
+            }
+            else if (tipo === 'luna') {
+                icono.innerText = "🌗";
+                titulo.innerText = data.datosAstro.luna;
+                definicion.innerText = "Tu Fase Lunar: Representa tu mundo emocional, tus necesidades de seguridad y cómo reaccionas instintivamente.";
+                detalle.innerHTML = `
+                    <strong>Origen:</strong> Se calcula mediante el ciclo de 29.5 días de la Luna.
+                    En <em>${data.datosAstro.luna}</em>, tu energía es ideal para soltar cargas y reflexionar sobre tu camino interno.
+                `;
+            }
+            else if (tipo === 'elemento') {
+                icono.innerText = "🌍";
+                titulo.innerText = `Elemento ${data.datosAstro.elemento}`;
+                definicion.innerText = "La Energía Vital: Los 12 signos se dividen en 4 elementos que rigen tu temperamento.";
+                detalle.innerHTML = `
+                    <strong>Naturaleza:</strong> Al ser elemento <strong>${data.datosAstro.elemento}</strong>, tu fuerza reside en la estabilidad,
+                    la perseverancia y la capacidad de manifestar ideas en el mundo real.
+                `;
+            }
+
+            modal.style.display = 'flex';
+        }
+
+        function cerrarModalAstro() {
+            document.getElementById('modalAstro').style.display = 'none';
+        }
+
+        function obtenerRegaloDivino_V1(fechaStr) {
+            if (!fechaStr) return 0;
+            
+            // Convertir string a objeto fecha
+            const fecha = new Date(fechaStr);
+            const d = fecha.getUTCDate();
+            const m = fecha.getUTCMonth() + 1;
+            const a = fecha.getUTCFullYear();
+
+            // Función para reducir a un dígito respetando 11 y 22
+            const reducirMistico = (num) => {
+                if (num === 11 || num === 22) return num;
+                if (num < 10) return num;
+                let suma = String(num).split('').reduce((acc, curr) => acc + parseInt(curr), 0);
+                return reducirMistico(suma);
+            };
+
+            // 1. Reducir día, mes y año por separado
+            const diaR = reducirMistico(d);
+            const mesR = reducirMistico(m);
+            
+            // Para el año, sumamos sus 4 dígitos y reducimos
+            const anioSuma = String(a).split('').reduce((acc, curr) => acc + parseInt(curr), 0);
+            const anioR = reducirMistico(anioSuma);
+
+            // 2. Sumar los tres resultados
+            let total = diaR + mesR + anioR;
+
+            // 3. Reducción final (Si da 11 o 22 se queda así, sino se reduce a un dígito)
+            if (total !== 11 && total !== 22 && total > 9) {
+                total = reducirMistico(total);
+            }
+
+            return total;
+        }
+
+        function obtenerRegaloDivino(fechaStr) {
+        if (!fechaStr) return 0;
+        
+            // 1. Extraer partes de la fecha (YYYY-MM-DD)
+            const partes = fechaStr.split(/[-T/]/);
+            const dia = parseInt(partes[2]);
+            const mes = parseInt(partes[1]);
+            const anio = parseInt(partes[0]);
+
+            // Función de reducción que respeta 11 y 22
+            const reducir = (n) => {
+                if (n === 11 || n === 22) return n;
+                if (n < 10) return n;
+                let s = String(n).split('').reduce((a, b) => a + parseInt(b), 0);
+                return s > 9 && s !== 11 && s !== 22 ? reducir(s) : s;
+            };
+
+            // 2. Reducir cada parte según tu lógica
+            const dR = reducir(dia);
+            const mR = reducir(mes);
+            
+            // El año se suma completo y luego se reduce (según la imagen)
+            const sumaAnio = String(anio).split('').reduce((a, b) => a + parseInt(b), 0);
+            const aR = reducir(sumaAnio);
+
+            // 3. Suma final
+            let total = dR + mR + aR;
+
+            // 4. Reducción final respetando maestros
+            if (total > 9 && total !== 11 && total !== 22) {
+                total = reducir(total);
+            }
+
+            return total;
+        }
+
+
+        // Configuración Maestra de Numerología
+        const CONFIG_NUMEROLOGIA = {
+            nombresPoderes: {
+                1: "Voluntad Creadora",
+                2: "Paz e Intuición",
+                3: "Autoexpresión Divina",
+                4: "Construcción y Orden",
+                5: "Libertad y Cambio",
+                6: "Amor y Armonía",
+                7: "Sabiduría Interior",
+                8: "Poder y Abundancia",
+                9: "Amor Universal",
+                11: "Iluminación",
+                22: "Maestría Material"
+            },
+            descripcionesPoderes: {
+                1: "Posees el don del inicio y el mando. Tu fuerza radica en la capacidad de convertir ideas en realidades mediante una voluntad inquebrantable. Eres un líder nato que abre caminos donde otros ven muros.",
+                2: "Tu poder es la diplomacia y la escucha del alma. Tienes la capacidad de armonizar conflictos y percibir lo que no se dice. Tu intuición es tu brújula más fiel en la vida.",
+                3: "Tu regalo es la comunicación y la alegría creativa. Tienes el don de inspirar a otros a través de la palabra, el arte o tu propia presencia. Tu optimismo es una herramienta de sanación.",
+                4: "Tienes el don de la estructura y la fiabilidad. Tu poder es dar cimientos sólidos a los sueños. Eres la roca en la que otros se apoyan, capaz de manifestar resultados tangibles con paciencia.",
+                5: "Tu poder es la adaptabilidad y la búsqueda de la libertad. Posees un magnetismo especial para el cambio y el progreso. Tu don es aprender a través de la experiencia directa y los sentidos.",
+                6: "Eres el guardián de la armonía. Tu poder es el amor responsable y la capacidad de sanar entornos. Tienes un don natural para el servicio, la familia y la creación de belleza.",
+                7: "Tu regalo es la profundidad mental y el análisis espiritual. Tienes el poder de encontrar la verdad oculta tras el velo de lo material. Eres un buscador de sabiduría y un observador del alma.",
+                8: "Posees el don del equilibrio entre lo material y lo espiritual. Tu poder es la autoridad justa y la manifestación de la abundancia. Sabes cómo gestionar la energía del dinero y el éxito.",
+                9: "Tu poder es el amor universal y la culminación. Tienes el don de la compasión y el entendimiento global. Eres un alma vieja que ha venido a servir a la humanidad y a cerrar ciclos con sabiduría.",
+                11: "Tu número es Maestro: Eres un canal de iluminación. Tu poder es la percepción extrasensorial y la visión espiritual. Has venido a ser un faro de luz y a elevar la conciencia de quienes te rodean.",
+                22: "Tu número es Maestro: Tienes el poder del Arquitecto Global. Tu don es la capacidad de construir sistemas o proyectos gigantescos que trascienden el tiempo y benefician a toda la raza humana."
+            }
+        };
+
+        async function abrirModalSuperpoder() {
+            const data = JSON.parse(localStorage.getItem('usuarioInfo'));
+            const numPoder = obtenerRegaloDivino(data.fechaNacimiento || data.FechaNacimiento);
+
+            document.getElementById('astroIcono').innerText = "⚡";
+            document.getElementById('astroTitulo').innerText = `Poder ${numPoder}`;
+            
+            // Usamos la configuración global para el nombre y la descripción
+            document.getElementById('astroDefinicion').innerText = CONFIG_NUMEROLOGIA.nombresPoderes[numPoder];
+            
+            const detalleLargo = CONFIG_NUMEROLOGIA.descripcionesPoderes[numPoder] || "Descripción en camino...";
+            document.getElementById('astroDetalle').innerHTML = `<p style="line-height:1.6;">${detalleLargo}</p>`;
+            
+            document.getElementById('modalAstro').style.display = 'flex';
+        }
+
+        async function abrirModalSuperpoder_v1() {
+            const data = JSON.parse(localStorage.getItem('usuarioInfo'));
+            const numPoder = obtenerRegaloDivino_V1(data.fechaNacimiento);
+
+            // Aquí puedes personalizar el mensaje que saldrá en el modal
+            const descripcionesPoderes = {
+                1: "Tu don es la iniciativa. Tienes la capacidad de empezar de nuevo cuantas veces sea necesario con una fuerza imparable.",
+                2: "Posees el don de la diplomacia y la sensibilidad. Eres el puente que une a las personas.",
+                11: "Eres un canal de luz. Tu superpoder es inspirar a otros a través de tu propia evolución espiritual.",
+                22: "Tienes el poder del 'Maestro Constructor'. Puedes manifestar grandes proyectos que beneficien a la humanidad."
+                // ... puedes completar los demás según tu libro
+            };
+
+            // Reutilizamos el modal que ya tienes para los astros
+            document.getElementById('astroIcono').innerText = "⚡";
+            document.getElementById('astroTitulo').innerText = "Tu Regalo Divino";
+            document.getElementById('astroDefinicion').innerText = "Un don que traes de nacimiento";
+            document.getElementById('astroDetalle').innerHTML = `<p style='line-height:1.6;'>${descripcionesPoderes[numPoder] || 'Este es un don especial que debes descubrir a través de la meditación.'}</p>`;
+            
+            document.getElementById('modalAstro').style.display = 'flex';
+        }
+
+    </script>
+
+    <div id="miModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="cerrarModal()">&times;</span>
+
+            <div style="text-align: center; margin-bottom: 25px;">
+                <h2 id="modalTitulo" style="color: #4a148c; margin-bottom: 5px;"></h2>
+                <div id="modalApodo" style="color: #d4af37; font-weight: bold; font-size: 1.2rem;"></div>
+            </div>
+
+            <div id="loadingMsg" style="text-align: center; padding: 20px;">Descifrando...</div>
+
+            <div id="modalCuerpo" style="display: none;">
+                <div class="modal-section" style="border-left-color: #4a148c;">
+                    <span class="section-title">🎯 Tu Misión</span>
+                    <p id="modalMision" style="margin: 0; color: #333;"></p>
+                </div>
+
+                <div class="modal-section" style="border-left-color: #f44336; background: #fff5f5;">
+                    <span class="section-title">⚠️ El Reto</span>
+                    <p id="modalReto" style="margin: 0; color: #333;"></p>
+                </div>
+
+                <div class="mantra-box">
+                    <span class="section-title" style="color: #e65100;">✨ Tu Mantra Sagrado</span>
+                    <p id="modalMantra"></p>
+                </div>
+
+                <div style="margin-bottom: 20px; text-align: center;">
+                    <span class="section-title">💎 Amuleto Sugerido</span>
+                    <div id="modalAmuleto" class="amuleto-tag"></div>
+                </div>
+
+                <!-- <div style="background: #4a148c; color: white; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 4px 15px rgba(74, 20, 140, 0.3);">
+                    <p id="modalMensajeMagico" style="margin: 0; font-weight: 500;"></p>
+                </div> -->
+
+                <div style="background: #4a148c; color: white; padding: 15px; border-radius: 10px; text-align: center;">
+                    <p style="margin: 0;">✨ <span id="modalMensajeMagico"></span> ✨</p>
+                </div>
+
+                <!-- <div id="loadingMsg" style="text-align: center; padding: 20px;">
+                    Descifrando tu código sagrado...
+                </div> -->
+
+                <div style="text-align: right; margin-top: 30px;">
+                    <button onclick="cerrarModal()" style="background: #6a1b9a; color: white; padding: 10px 25px; border: none; border-radius: 25px; cursor: pointer; font-weight: bold;">
+                        Cerrar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="miModal_ant3" class="modal">
+        <div class="modal-content" style="border-top: 8px solid #4a148c; max-width: 600px;">
+        <span class="close-btn" onclick="cerrarModal()">&times;</span>
+
+        <div style="text-align: center; margin-bottom: 20px;">
+            <h2 id="modalTitulo" style="margin-bottom: 5px; color: #4a148c;"></h2>
+            <h3 id="modalApodo" style="color: #d4af37; font-style: italic; margin-top: 0;"></h3>
+        </div>
+
+        <div id="modalCuerpo" style="display: none;">
+            <div style="background: #f3e5f5; padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+                <strong>Misión:</strong> <p id="modalMision"></p>
+            </div>
+
+            <p><strong>El Reto:</strong> <span id="modalReto"></span></p>
+
+            <div style="border-left: 4px solid #ffd700; padding-left: 15px; margin: 20px 0;">
+                <p><strong>Tu Mantra:</strong> <br><em id="modalMantra" style="font-size: 1.2rem;"></em></p>
+            </div>
+
+            <p><strong>Tu Amuleto:</strong> <span id="modalAmuleto"></span></p>
+
+            <div style="background: #4a148c; color: white; padding: 15px; border-radius: 10px; text-align: center;">
+                <p style="margin: 0;">✨ <span id="modalMensajeMagico"></span> ✨</p>
+            </div>
+        </div>
+
+        <div style="text-align: right; margin-top: 30px;">
+            <button onclick="cerrarModal()" style="background: #6a1b9a; color: white; padding: 10px 25px; border: none; border-radius: 25px; cursor: pointer; font-weight: bold;">
+                Cerrar
+            </button>
+        </div>
+    </div>
+
+    </div>
+
+
+    <div id="miModal_ant2" class="modal">
+        <div class="modal-content" style="border-top: 8px solid #4a148c; background: #fff;">
+            <span class="close-btn" onclick="cerrarModal()">&times;</span>
+            <h2 id="modalTitulo" style="color: #4a148c; font-family: 'Georgia', serif;">Título</h2>
+            <hr style="border: 0; border-top: 1px solid #eee; margin-bottom: 20px;">
+            <div id="modalTexto" style="font-size: 1.1rem; color: #444; line-height: 1.7;">
+                Cargando sabiduría...
+            </div>
+            <div style="text-align: right; margin-top: 30px;">
+                <button onclick="cerrarModal()" style="background: #6a1b9a; color: white; padding: 10px 25px; border: none; border-radius: 25px; cursor: pointer; font-weight: bold;">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="miModal_ant" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="cerrarModal()">&times;</span>
+            <h2 id="modalTitulo">Título</h2>
+            <div id="modalTexto">Contenido detallado de tu libro...</div>
+            <button onclick="cerrarModal()" style="margin-top:20px;">Entendido</button>
+        </div>
+    </div>
+
+
+
+    <button class="btn-flotante" onclick="abrirBitacora()">✒️</button>
+
+    <div id="modalBitacora" class="modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <span class="close-btn" onclick="cerrarBitacora()">&times;</span>
+            <h2 style="color: #4a148c; text-align: center;">Bitácora del Despertar</h2>
+
+            <div style="margin-bottom: 15px;">
+                <label>¿Qué deseas registrar?</label>
+                <select id="tipoRegistro" onchange="ajustarFormulario()" style="width: 100%; padding: 10px; border-radius: 8px;">
+                    <option value="Sentimiento">Mi Sentir Actual</option>
+                    <option value="Sincronicidad">Número Visto (Sincronicidad)</option>
+                    <option value="Reto">Reto Semanal Cumplido</option>
+                </select>
+            </div>
+
+            <div id="divValorSincronico" style="display: none; margin-bottom: 15px;">
+                <label>¿Qué número viste?</label>
+                <input type="text" id="valorSincronico" placeholder="Ej: 11:11" style="width: 100%; padding: 10px;">
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <label id="labelContenido">Cuéntame más...</label>
+                <textarea id="contenidoBitacora" rows="4" style="width: 100%; border-radius: 8px; padding: 10px;"></textarea>
+            </div>
+
+            <button onclick="guardarEnBitacora()" style="width: 100%; background: #4a148c; color: white; padding: 12px; border: none; border-radius: 25px; font-weight: bold; cursor: pointer;">
+                Guardar en mi camino
+            </button>
+        </div>
+    </div>
+    <div id="modalHistorial" class="modal">
+        <div class="modal-content" style="max-width: 550px; border-top: 8px solid #d4af37;">
+            <span class="close-btn" onclick="cerrarHistorial()">&times;</span>
+            <h2 style="color: #4a148c; text-align: center;">Mi Camino Sagrado</h2>
+
+            <div style="text-align: center; margin-bottom: 20px; display: flex; justify-content: center; gap: 5px; flex-wrap: wrap;">
+                <button onclick="cargarHistorialBitacora('Todos')" style="background:#eee; border:none; padding:8px 15px; border-radius:20px; cursor:pointer;">✨ Todos</button>
+                <button onclick="cargarHistorialBitacora('Sincronicidad')" style="background:#fff3e0; border:1px solid #ff9800; padding:8px 15px; border-radius:20px; cursor:pointer;">🕒 Señales</button>
+                <button onclick="cargarHistorialBitacora('Sentimiento')" style="background:#e3f2fd; border:1px solid #2196f3; padding:8px 15px; border-radius:20px; cursor:pointer;">📔 Sentir</button>
+                <button onclick="cargarHistorialBitacora('Reto')" style="background:#e8f5e9; border:1px solid #4caf50; padding:8px 15px; border-radius:20px; cursor:pointer;">✅ Retos</button>
+            </div>
+
+            <div id="listaBitacora" style="flex-grow: 1; overflow-y: auto; padding-right: 10px; -webkit-overflow-scrolling: touch;">
+                </div>
+        </div>
+    </div>
+
+    <div id="modalDiploma" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:1000; align-items:center; justify-content:center; padding:15px; box-sizing:border-box;">
+        <div id="diplomaContenido" style="background:#fffaf0; width:100%; max-width:420px; padding:35px 25px; border-radius:15px; text-align:center; border: 8px double #4a148c; position:relative; box-shadow: 0 0 40px rgba(156, 39, 176, 0.6);">
+
+            <div style="font-size:2rem; margin-bottom:5px;">✨</div>
+            <div style="color:#4a148c; font-size:1.1rem; font-weight:bold; text-transform:uppercase; letter-spacing:1px; margin-bottom:15px;">Diploma de Evolución Consciente</div>
+
+            <p style="font-style:italic; color:#777; margin:10px 0;">Este certificado se otorga a:</p>
+
+            <h1 id="diplomaNombreUsuario" style="color:#4a148c; font-family:'Georgia', serif; font-size:1.8rem; margin:15px 0; border-bottom:1px solid #eee; padding-bottom:10px;">Nombre Usuario</h1>
+
+            <p style="font-style:italic; color:#777; margin:15px 0;">Por haber integrado el reto sagrado de la semana:</p>
+
+            <h2 id="diplomaTituloReto" style="color:#2e7d32; font-family:'Georgia', serif; font-size:1.4rem; margin:15px 0;">Título del Reto Aquí</h2>
+
+            <div style="margin:25px 0; border-top:1px solid #ddd; padding-top:15px;">
+                <p id="diplomaFecha" style="font-size:0.75rem; color:#aaa;"></p>
+                <p style="font-size:0.95rem; color:#4a148c; font-style:italic; margin-top:10px;">"El universo es un lenguaje de números y luz."</p>
+            </div>
+
+            <div style="background:#f3e5f5; padding:12px; border-radius:12px; margin-bottom:20px; font-size:0.85rem;">
+                <small style="color:#7b1fa2; display:block; margin-bottom:3px;">Inicia tu propia transformación en:</small>
+                <strong style="color:#4a148c; font-weight:bold;">tuweb.com/numerologia</strong>
+            </div>
+
+            <div style="display:flex; gap:10px; justify-content:center;">
+                <button onclick="cerrarDiploma()" style="background:#f5f5f5; color:#666; border:1px solid #ccc; padding:10px 20px; border-radius:25px; cursor:pointer; font-weight:bold;">Cerrar</button>
+                <button onclick="prepararCaptura()" style="background:#4a148c; color:white; border:none; padding:10px 25px; border-radius:25px; cursor:pointer; font-weight:bold;">Toma Captura 📸</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalAstro" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(26, 10, 46, 0.9); z-index:2000; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;">
+
+        <div style="background:#fffaf0; width:100%; max-width:380px; padding:30px 20px; border-radius:20px; text-align:center; border: 6px double #4a148c; box-shadow: 0 0 40px rgba(106, 27, 154, 0.6); position:relative; overflow-y:auto; max-height:90vh;">
+
+            <button onclick="cerrarModalAstro()" style="position:absolute; top:10px; right:10px; background:none; border:none; font-size:1.5rem; color:#4a148c; cursor:pointer; padding:10px;">✕</button>
+
+            <div id="astroIcono" style="font-size: 3.5rem; margin-bottom: 10px;">🌟</div>
+
+            <h3 id="astroTitulo" style="color:#4a148c; text-transform:uppercase; letter-spacing:2px; margin: 10px 0; font-size: 1.4rem;">Título</h3>
+
+            <div style="width:50px; height:2px; background:#d4af37; margin: 15px auto;"></div>
+
+            <div style="text-align:left; color:#333; line-height:1.5; font-size:1rem;">
+                <p id="astroDefinicion" style="font-style:italic; color:#666; margin-bottom:15px;"></p>
+
+                <div id="astroDetalle" style="background:rgba(106, 27, 154, 0.05); padding:15px; border-radius:12px; border-left:4px solid #4a148c;">
+                    </div>
+            </div>
+
+            <button onclick="cerrarModalAstro()" style="margin-top:25px; width:100%; background:#4a148c; color:white; border:none; padding:15px; border-radius:30px; font-weight:bold; font-size:1.1rem; box-shadow: 0 4px 15px rgba(74, 20, 140, 0.3);">Entendido</button>
+        </div>
+    </div>
+
+</body>
+
+</div>
+</html>
