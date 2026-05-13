@@ -319,7 +319,7 @@ namespace Guia.API.Controllers
             //     return BadRequest("El usuario o correo ya existe.");
             // }
             // Por esto (Versión para MySQL/MariaDB):
-            catch (DbUpdateException ex) when (ex.InnerException is MySqlConnector.MySqlException mySqlEx && (mySqlEx.Number == 1062))
+            catch (DbUpdateException ex) when (ex.InnerException is Microsoft.Data.SqlClient.SqlException sqlEx && (sqlEx.Number == 2601 || sqlEx.Number == 2627))
             {
                 return BadRequest("El usuario o correo ya existe.");
             }

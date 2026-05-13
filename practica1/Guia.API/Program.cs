@@ -32,12 +32,12 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
         */
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-var serverVersion = new MySqlServerVersion(new Version(8, 0, 31)); // Versión estándar de MariaDB/MySQL
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseMySql(connectionString, serverVersion,
-        mySqlOptions => {
-            mySqlOptions.EnableRetryOnFailure(
+    options.UseSqlServer(connectionString,
+        sqlOptions => {
+            // Esto soluciona el error de "Transient Failure"
+            sqlOptions.EnableRetryOnFailure(
                 maxRetryCount: 5,
                 maxRetryDelay: TimeSpan.FromSeconds(10),
                 errorNumbersToAdd: null);
