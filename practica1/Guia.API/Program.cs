@@ -82,7 +82,7 @@ if (app.Environment.IsDevelopment())
 
 // 5. Activación de Rutas
 app.MapControllers(); // ¡ESTA TAMBIÉN ES VITAL!
-
+https://allurereport.org/start/
 // Puedes dejar o borrar el weatherforecast, no estorba.
 app.MapGet("/", () => "API Guía de Transformación Activa"); 
 
